@@ -398,7 +398,7 @@
         <div class="role-guide-item"><b style="color:var(--police-blue);">🔍 경찰:</b> 밤마다 1명의 정체를 조사해 마피아 여부를 즉시 알아냅니다.</div>
         <div class="role-guide-item"><b style="color:var(--soldier-amber);">🛡️ 군인:</b> 밤마다 1명을 경호/방어합니다. 마피아가 공격한 대상을 지키면 <b>공격을 방어</b>해 냅니다. (⚠️ <b>자기 자신 불가</b>)</div>
         <div class="role-guide-item"><b style="color:var(--medium-purple);">👻 영매:</b> 밤마다 <b>사망자 1명</b>을 선택해 진짜 정체(마피아/시민팀)를 확인합니다.</div>
-        <div class="role-guide-item"><b style="color:var(--citizen-gray);">🕊️ 시민:</b> 선량한 시민입니다. 낮에 토론과 스마트폰 익명 투표로 마피아를 찾습니다.</div>
+        <div class="role-guide-item" onclick="handleCitizenClick()" style="cursor: pointer; user-select: none; -webkit-user-select: none;"><b style="color:var(--citizen-gray);">🕊️ 시민:</b> 선량한 시민입니다. 낮에 토론과 스마트폰 익명 투표로 마피아를 찾습니다.</div>
       </div>
     </div>
 
@@ -772,6 +772,31 @@
     </div>
   </div>
 
+  <!-- ============================================== -->
+  <!-- 🚨 긴급 마스터 강제 초기화 모달 (시민 10번 탭) -->
+  <!-- ============================================== -->
+  <div id="masterResetModal" class="secret-modal">
+    <div class="secret-modal-content" style="border: 2px solid #ef4444;">
+      <div style="font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; color: #dc2626; display: flex; align-items: center; gap: 6px;">
+        <span>🚨</span> <span>긴급 마스터 강제 초기화</span>
+      </div>
+      <p style="font-size: 0.82rem; color: #7f1d1d; margin-bottom: 12px; line-height: 1.4; background: #fee2e2; padding: 8px 10px; border-radius: 8px;">
+        사회자 기기를 잊어버렸거나 분실했을 때 사용하는 비상 기능입니다.<br>
+        비밀번호를 입력하면 <b>모든 참가자의 접속이 강제 해제</b>되며 초기화됩니다.
+      </p>
+      <div style="margin-bottom: 14px;">
+        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
+          사회자 비밀번호 입력:
+        </label>
+        <input type="password" id="inputMasterResetPassword" placeholder="비밀번호 4자리 (3499)" maxlength="10">
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-danger" style="flex: 1.5; padding: 11px; font-size: 0.9rem;" onclick="submitMasterReset()">🚨 전체 강제 퇴장 & 리셋</button>
+        <button class="btn btn-secondary" style="flex: 1; margin: 0; padding: 11px; font-size: 0.88rem;" onclick="closeMasterResetModal()">취소</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* =====================================================================
        [1] FIREBASE 설정 키
@@ -857,6 +882,23 @@
           if (!gameState.dayVotes) gameState.dayVotes = {};
           if (!gameState.trialVotes) gameState.trialVotes = {};
 
+          // [긴급 마스터 초기화 감지] 다른 기기에서 전체 강제 리셋을 실행했을 때
+          const lastHandledReset = parseInt(localStorage.getItem('mafia_handled_reset_time') || '0');
+          if (gameState.lastResetTime && gameState.lastResetTime > lastHandledReset) {
+            localStorage.setItem('mafia_handled_reset_time', gameState.lastResetTime);
+            if (myPlayerId || isAdmin) {
+              localStorage.removeItem('mafia_my_player_id');
+              localStorage.removeItem('mafia_my_name');
+              myPlayerId = null;
+              myPlayerName = null;
+              isAdmin = false;
+              document.getElementById('quickNavBar').style.display = 'none';
+              showScreen('screenLogin');
+              alert("🚨 [사회자 긴급 마스터 초기화]\n전체 게임이 강제 초기화되었습니다.\n모든 참가자의 연결이 해제되어 첫 화면으로 이동합니다.");
+              return;
+            }
+          }
+
           // 만약 내가 이미 관리자 권한을 가졌던 기기라면 자동 복구
           if (gameState.activeAdminDevice && gameState.activeAdminDevice === myDeviceToken) {
             isAdmin = true;
@@ -871,6 +913,23 @@
         const saved = localStorage.getItem('mafia_local_game_state');
         if (saved) {
           gameState = JSON.parse(saved);
+
+          const lastHandledReset = parseInt(localStorage.getItem('mafia_handled_reset_time') || '0');
+          if (gameState.lastResetTime && gameState.lastResetTime > lastHandledReset) {
+            localStorage.setItem('mafia_handled_reset_time', gameState.lastResetTime);
+            if (myPlayerId || isAdmin) {
+              localStorage.removeItem('mafia_my_player_id');
+              localStorage.removeItem('mafia_my_name');
+              myPlayerId = null;
+              myPlayerName = null;
+              isAdmin = false;
+              document.getElementById('quickNavBar').style.display = 'none';
+              showScreen('screenLogin');
+              alert("🚨 [사회자 긴급 마스터 초기화]\n전체 게임이 강제 초기화되었습니다.\n모든 참가자의 연결이 해제되어 첫 화면으로 이동합니다.");
+              return;
+            }
+          }
+
           renderUI();
         }
       });
@@ -952,6 +1011,83 @@
         showScreen('screenLogin');
         alert("사회자 권한이 정상적으로 해제되었습니다.");
       }
+    }
+
+    /* =====================================================================
+       [4-1] 🚨 비상 탈출구: 시민 10번 연타 & 3499 비번 & 마스터 강제 초기화
+       ===================================================================== */
+    let citizenClickCount = 0;
+    let citizenClickTimer = null;
+
+    function handleCitizenClick() {
+      citizenClickCount++;
+      clearTimeout(citizenClickTimer);
+      citizenClickTimer = setTimeout(() => {
+        citizenClickCount = 0;
+      }, 3000); // 3초 안에 10번 클릭해야 함
+
+      if (citizenClickCount >= 10) {
+        citizenClickCount = 0;
+        openMasterResetModal();
+      }
+    }
+
+    function openMasterResetModal() {
+      document.getElementById('inputMasterResetPassword').value = '';
+      document.getElementById('masterResetModal').classList.add('active');
+      document.getElementById('inputMasterResetPassword').focus();
+    }
+
+    function closeMasterResetModal() {
+      document.getElementById('masterResetModal').classList.remove('active');
+    }
+
+    function submitMasterReset() {
+      const pw = document.getElementById('inputMasterResetPassword').value.trim();
+      if (pw !== '3499') {
+        alert("비밀번호가 올바르지 않습니다.");
+        return;
+      }
+
+      if (!confirm("🚨 [최종 확인]\n정말로 전체 게임을 비상 강제 초기화하시겠습니까?\n\n현재 접속 중인 모든 참가자의 스마트폰 연결이 끊어지고,\n사회자 독점 잠금도 완전히 해제됩니다.")) {
+        return;
+      }
+
+      const resetTimestamp = Date.now();
+      gameState = {
+        phase: 'lobby',
+        dayCount: 1,
+        players: {},
+        activeAdminDevice: null,
+        lastResetTime: resetTimestamp,
+        nightActions: {
+          mafiaTargets: {},
+          doctorTarget: null,
+          soldierTarget: null,
+          policeTarget: null,
+          mediumTarget: null
+        },
+        dayStep: 'voting',
+        dayVotes: {},
+        dayVoteResult: null,
+        trialTargetId: null,
+        trialVotes: {},
+        trialResult: null,
+        lastNightResult: null
+      };
+
+      localStorage.setItem('mafia_handled_reset_time', resetTimestamp);
+      localStorage.removeItem('mafia_my_player_id');
+      localStorage.removeItem('mafia_my_name');
+      myPlayerId = null;
+      myPlayerName = null;
+      isAdmin = false;
+      document.getElementById('quickNavBar').style.display = 'none';
+
+      closeMasterResetModal();
+      syncGameStateToCloud();
+      showScreen('screenLogin');
+      alert("🧹 [긴급 마스터 초기화 완료]\n\n전체 게임이 리셋되었으며 모든 참가자의 접속이 해제되었습니다.\n이제 새로운 스마트폰으로 사회자 모드에 다시 진입하실 수 있습니다.");
     }
 
     /* =====================================================================
