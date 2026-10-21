@@ -406,9 +406,26 @@
     <!-- 2. 플레이어 화면 -->
     <!-- ============================================== -->
     <div id="screenPlayer" class="screen">
+      <!-- 플레이어 상단 바 (내 이름 & 로그아웃) -->
+      <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; box-shadow: var(--card-shadow);">
+        <div style="font-size: 0.88rem; font-weight: 700; color: #111827;">
+          내 이름: <span id="topPlayerNameDisplay" style="color: var(--primary);"></span>
+        </div>
+        <button onclick="logoutPlayer()" style="background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; border-radius: 8px; padding: 5px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+          🚪 로그아웃 (이름 변경)
+        </button>
+      </div>
+
       <!-- 페이즈 배너 -->
       <div id="playerPhaseBanner" class="phase-banner phase-day" style="display: none;">
         ☀️ 낮 시간
+      </div>
+
+      <!-- 낮 시간: 지난밤 비밀 보고서 카드 (경찰/영매 전용 결과 확인) -->
+      <div class="card" id="playerNightReportCard" style="display: none; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+        <div class="card-title" id="playerReportTitle" style="margin-bottom: 8px;">📋 지난밤 비밀 보고서</div>
+        <div id="playerReportContent" style="font-size: 0.95rem; line-height: 1.5; font-weight: 700;"></div>
+        <div style="font-size: 0.78rem; color: #64748b; margin-top: 8px;">* 낮 토론 시간에 이 정보를 바탕으로 전략적인 추리를 펼치세요!</div>
       </div>
 
       <!-- 내 직업 확인 카드 -->
@@ -542,7 +559,10 @@
           <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 8px 0;">
           <div>📢 <b>밤 결과 판정:</b> <span id="adminNightConclusion" style="font-weight: 800; color: #b45309;">밤이 끝나면 계산됩니다.</span></div>
         </div>
-        <button class="btn btn-secondary" onclick="applyNightDeath()">⚰️ 판정 사망자 적용하기</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-day" style="flex: 1.5; font-size: 0.95rem;" onclick="setGamePhase('day')">☀️ 밤 종료하고 낮으로 넘어가기</button>
+          <button class="btn btn-secondary" style="flex: 1; margin: 0; font-size: 0.82rem;" onclick="applyNightDeath()">⚰️ 사망자 적용</button>
+        </div>
       </div>
 
       <!-- 낮 스마트폰 익명 투표 집계 현황 -->
@@ -968,6 +988,22 @@
       showScreen('screenPlayer');
     }
 
+    function logoutPlayer() {
+      if (confirm("정말 로그아웃하고 첫 화면(닉네임 입력)으로 돌아가시겠습니까?")) {
+        // 대기실 모집 중일 때는 서버 명단에서도 퇴장 처리
+        if (gameState.phase === 'lobby' && myPlayerId && gameState.players && gameState.players[myPlayerId]) {
+          delete gameState.players[myPlayerId];
+          syncGameStateToCloud();
+        }
+        localStorage.removeItem('mafia_my_player_id');
+        localStorage.removeItem('mafia_my_name');
+        myPlayerId = null;
+        myPlayerName = null;
+        showScreen('screenLogin');
+        renderUI();
+      }
+    }
+
     function showScreen(screenId) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(screenId).classList.add('active');
@@ -1127,12 +1163,34 @@
         }
       }
 
+      // 경찰 조사 결과 기록 (낮에 본인에게만 공개)
+      let policeResult = null;
+      if (actions.policeTarget && gameState.players[actions.policeTarget]) {
+        policeResult = {
+          targetId: actions.policeTarget,
+          targetName: gameState.players[actions.policeTarget].name,
+          isMafia: (gameState.players[actions.policeTarget].role === 'mafia')
+        };
+      }
+
+      // 영매 접신 결과 기록 (낮에 본인에게만 공개)
+      let mediumResult = null;
+      if (actions.mediumTarget && gameState.players[actions.mediumTarget]) {
+        mediumResult = {
+          targetId: actions.mediumTarget,
+          targetName: gameState.players[actions.mediumTarget].name,
+          isMafia: (gameState.players[actions.mediumTarget].role === 'mafia')
+        };
+      }
+
       gameState.lastNightResult = {
         mafiaTarget: mafiaTarget,
         doctorTarget: doctorTarget,
         killedPlayerId: killedPlayerId,
         isSavedByDoctor: isSavedByDoctor,
-        isSavedBySoldier: isSavedBySoldier
+        isSavedBySoldier: isSavedBySoldier,
+        policeResult: policeResult,
+        mediumResult: mediumResult
       };
     }
 
@@ -1264,23 +1322,21 @@
         gameState.nightActions.doctorTarget = targetId;
         alert(`[${gameState.players[targetId].name}] 님을 오늘 밤 치료합니다.`);
       } else if (me.role === 'police') {
+        if (gameState.nightActions.policeTarget) {
+          alert("⚠️ 경찰은 하룻밤에 1명만 조사할 수 있습니다. 이미 오늘 밤 조사를 완료하셨습니다!");
+          return;
+        }
         gameState.nightActions.policeTarget = targetId;
         const target = gameState.players[targetId];
-        const isMafia = target && target.role === 'mafia';
-        if (isMafia) {
-          alert(`🚨 [경찰 조사 결과]\n\n"${target.name}" 님은 [ 마피아 🔴 ] 가 맞습니다!`);
-        } else {
-          alert(`🕊️ [경찰 조사 결과]\n\n"${target.name}" 님은 [ 선량한 시민/특수직 🟢 ] 입니다.`);
-        }
+        alert(`🤫 [경찰 수색 완료]\n\n"${target.name}" 님을 오늘 밤 조사 대상으로 지정했습니다.\n\n⚠️ 밤 시간 스포일러 방지를 위해, 조사 결과는 [날이 밝으면] 당신의 스마트폰에 조용히 공개됩니다!`);
       } else if (me.role === 'medium') {
+        if (gameState.nightActions.mediumTarget) {
+          alert("⚠️ 영매는 하룻밤에 1명의 영혼만 접신할 수 있습니다. 이미 오늘 밤 조사를 완료하셨습니다!");
+          return;
+        }
         gameState.nightActions.mediumTarget = targetId;
         const target = gameState.players[targetId];
-        const isMafia = target && target.role === 'mafia';
-        if (isMafia) {
-          alert(`👻 [영매 접신 결과]\n\n사망한 "${target.name}" 님의 영혼:\n"나는 살아생전 [ 마피아 🔴 ] 였다..."`);
-        } else {
-          alert(`👻 [영매 접신 결과]\n\n사망한 "${target.name}" 님의 영혼:\n"나는 억울하게 죽은 [ 시민팀 🟢 ] 이었소..."`);
-        }
+        alert(`🤫 [영매 접신 완료]\n\n사망한 "${target.name}" 님의 영혼과 접신을 완료했습니다.\n\n⚠️ 밤 시간 스포일러 방지를 위해, 접신 결과는 [날이 밝으면] 당신의 스마트폰에 조용히 공개됩니다!`);
       }
 
       syncGameStateToCloud();
@@ -1321,6 +1377,8 @@
       // 1. 플레이어 화면
       if (myPlayerId && players[myPlayerId]) {
         const me = players[myPlayerId];
+        const topNameEl = document.getElementById('topPlayerNameDisplay');
+        if (topNameEl) topNameEl.textContent = me.name;
 
         if (gameState.phase === 'lobby') {
           document.getElementById('playerRoleCard').style.display = 'none';
@@ -1399,6 +1457,42 @@
             document.getElementById('playerPhaseBanner').textContent = `☀️ 낮 시간 (토론 & 스마트폰 익명 투표)`;
             document.getElementById('playerNightActionCard').style.display = 'none';
             document.getElementById('playerWaitingCard').style.display = 'none';
+
+            // [NEW] 낮 시간에 경찰 및 영매 전용 결과 보고서 표시! (밤에는 스포일러 방지)
+            const reportCard = document.getElementById('playerNightReportCard');
+            const reportTitle = document.getElementById('playerReportTitle');
+            const reportContent = document.getElementById('playerReportContent');
+            const nightRes = gameState.lastNightResult;
+
+            if (me.role === 'police' && nightRes?.policeResult) {
+              reportCard.style.display = 'block';
+              reportCard.style.border = '2px solid var(--police-blue)';
+              reportCard.style.background = '#eff6ff';
+              reportTitle.style.color = 'var(--police-blue)';
+              reportTitle.textContent = '🔍 어젯밤 경찰 수색 결과 보고서';
+              reportContent.innerHTML = `
+                어젯밤 조사한 [ <span style="text-decoration:underline;">${nightRes.policeResult.targetName}</span> ] 님은:
+                <br>
+                <span style="font-size:1.15rem; color:${nightRes.policeResult.isMafia ? 'var(--mafia-red)' : 'var(--doctor-green)'};">
+                  ${nightRes.policeResult.isMafia ? '👉 [ 마피아 🔴 ] 가 맞습니다!' : '👉 [ 선량한 시민팀 🟢 ] 입니다.'}
+                </span>
+              `;
+            } else if (me.role === 'medium' && nightRes?.mediumResult) {
+              reportCard.style.display = 'block';
+              reportCard.style.border = '2px solid var(--medium-purple)';
+              reportCard.style.background = '#faf5ff';
+              reportTitle.style.color = 'var(--medium-purple)';
+              reportTitle.textContent = '👻 어젯밤 영매 접신 결과 보고서';
+              reportContent.innerHTML = `
+                사망한 [ <span style="text-decoration:underline;">${nightRes.mediumResult.targetName}</span> ] 님의 영혼의 목소리:
+                <br>
+                <span style="font-size:1.15rem; color:${nightRes.mediumResult.isMafia ? 'var(--mafia-red)' : 'var(--doctor-green)'};">
+                  ${nightRes.mediumResult.isMafia ? '"나는 살아생전 [ 마피아 🔴 ] 였습니다..."' : '"나는 억울하게 죽은 [ 시민팀 🟢 ] 이었습니다..."'}
+                </span>
+              `;
+            } else {
+              reportCard.style.display = 'none';
+            }
 
             if (me.isAlive) {
               document.getElementById('playerDayVoteCard').style.display = 'block';
@@ -1502,41 +1596,63 @@
               // [3] 경찰
               } else if (me.role === 'police') {
                 titleEl.textContent = '🔍 경찰 수색 조사';
-                subEl.textContent = '정체를 조사할 사람을 선택하세요:';
+                const hasInvestigated = !!gameState.nightActions?.policeTarget;
+                
+                if (hasInvestigated) {
+                  const targetName = players[gameState.nightActions.policeTarget]?.name || '';
+                  subEl.innerHTML = `<span style="color:var(--police-blue); font-weight:700;">✅ [${targetName}] 님 조사 신청 완료 (결과는 낮에 스마트폰에 공개됩니다)</span>`;
+                } else {
+                  subEl.textContent = '정체를 조사할 사람을 선택하세요 (결과는 낮에 공개):';
+                }
 
                 alivePlayers.forEach(target => {
                   const isSelected = (gameState.nightActions?.policeTarget === target.id);
+                  const isLocked = hasInvestigated && !isSelected;
+
                   const item = document.createElement('div');
-                  item.className = 'action-target-item' + (isSelected ? ' selected' : '');
+                  item.className = 'action-target-item' + (isSelected ? ' selected' : (isLocked ? ' disabled' : ''));
                   item.innerHTML = `
                     <span style="font-weight:700;">${target.name}</span>
                     <span style="font-size:0.8rem; color:${isSelected ? 'var(--police-blue)' : 'var(--text-muted)'}; font-weight:700;">
-                      ${isSelected ? '조사완료 ✓' : '조사하기'}
+                      ${isSelected ? '조사선택됨 ✓' : (hasInvestigated ? '선택불가' : '조사하기')}
                     </span>
                   `;
-                  item.onclick = () => submitPlayerNightAction(target.id);
+                  if (!hasInvestigated) {
+                    item.onclick = () => submitPlayerNightAction(target.id);
+                  }
                   targetListEl.appendChild(item);
                 });
 
               // [4] 영매
               } else if (me.role === 'medium') {
                 titleEl.textContent = '👻 영매 접신 의식';
-                subEl.textContent = '사망한 사람 중 진짜 정체를 밝힐 1명을 선택하세요:';
+                const hasInvestigated = !!gameState.nightActions?.mediumTarget;
+
+                if (hasInvestigated) {
+                  const targetName = players[gameState.nightActions.mediumTarget]?.name || '';
+                  subEl.innerHTML = `<span style="color:var(--medium-purple); font-weight:700;">✅ [${targetName}] 님 접신 신청 완료 (결과는 낮에 스마트폰에 공개됩니다)</span>`;
+                } else {
+                  subEl.textContent = '사망자 중 정체를 밝힐 1명을 선택하세요 (결과는 낮에 공개):';
+                }
 
                 if (deadPlayers.length === 0) {
                   targetListEl.innerHTML = '<div style="color:var(--text-muted); padding:10px; font-size:0.85rem;">아직 사망한 사람이 없어 접신할 수 없습니다.</div>';
                 } else {
                   deadPlayers.forEach(target => {
                     const isSelected = (gameState.nightActions?.mediumTarget === target.id);
+                    const isLocked = hasInvestigated && !isSelected;
+
                     const item = document.createElement('div');
-                    item.className = 'action-target-item' + (isSelected ? ' selected' : '');
+                    item.className = 'action-target-item' + (isSelected ? ' selected' : (isLocked ? ' disabled' : ''));
                     item.innerHTML = `
                       <span style="font-weight:700;">${target.name} 💀</span>
                       <span style="font-size:0.8rem; color:${isSelected ? 'var(--medium-purple)' : 'var(--text-muted)'}; font-weight:700;">
-                        ${isSelected ? '접신완료 ✓' : '영혼 조사'}
+                        ${isSelected ? '접신선택됨 ✓' : (hasInvestigated ? '선택불가' : '영혼 조사')}
                       </span>
                     `;
-                    item.onclick = () => submitPlayerNightAction(target.id);
+                    if (!hasInvestigated) {
+                      item.onclick = () => submitPlayerNightAction(target.id);
+                    }
                     targetListEl.appendChild(item);
                   });
                 }
@@ -1598,13 +1714,41 @@
           manualList.appendChild(item);
         });
 
-        // 밤 행동 실시간 집계 텍스트
+        // 밤 행동 실시간 집계 텍스트 (사망한 직업은 명확히 사망 표시!)
         const actions = gameState.nightActions || {};
-        const mafiaVotes = Object.values(actions.mafiaTargets || {}).map(id => players[id]?.name || id);
-        document.getElementById('adminMafiaTargetText').textContent = mafiaVotes.length > 0 ? mafiaVotes.join(', ') : '선택 대기 중';
-        document.getElementById('adminDoctorTargetText').textContent = players[actions.doctorTarget]?.name || '선택 대기 중';
-        document.getElementById('adminPoliceTargetText').textContent = players[actions.policeTarget]?.name ? `${players[actions.policeTarget].name} (조사함)` : '대기 중';
-        document.getElementById('adminMediumTargetText').textContent = players[actions.mediumTarget]?.name ? `${players[actions.mediumTarget].name} (접신함)` : '대기 중';
+        const aliveMafias = alivePlayers.filter(p => p.role === 'mafia');
+        const aliveDoctors = alivePlayers.filter(p => p.role === 'doctor');
+        const alivePolices = alivePlayers.filter(p => p.role === 'police');
+        const aliveMediums = alivePlayers.filter(p => p.role === 'medium');
+
+        // 마피아 상태
+        if (aliveMafias.length === 0) {
+          document.getElementById('adminMafiaTargetText').innerHTML = '<span style="color:#9ca3af; font-weight:normal;">마피아 전원 소탕 💀 (시민 승리 조건)</span>';
+        } else {
+          const mafiaVotes = Object.values(actions.mafiaTargets || {}).map(id => players[id]?.name || id);
+          document.getElementById('adminMafiaTargetText').textContent = mafiaVotes.length > 0 ? mafiaVotes.join(', ') : '선택 대기 중';
+        }
+
+        // 의사 상태
+        if (aliveDoctors.length === 0) {
+          document.getElementById('adminDoctorTargetText').innerHTML = '<span style="color:#9ca3af; font-weight:normal;">사망함 💀 (치료 없음)</span>';
+        } else {
+          document.getElementById('adminDoctorTargetText').textContent = players[actions.doctorTarget]?.name || '선택 대기 중';
+        }
+
+        // 경찰 상태
+        if (alivePolices.length === 0) {
+          document.getElementById('adminPoliceTargetText').innerHTML = '<span style="color:#9ca3af; font-weight:normal;">사망함 💀 (조사 없음)</span>';
+        } else {
+          document.getElementById('adminPoliceTargetText').textContent = players[actions.policeTarget]?.name ? `${players[actions.policeTarget].name} (조사 완료)` : '조사 대기 중';
+        }
+
+        // 영매 상태
+        if (aliveMediums.length === 0) {
+          document.getElementById('adminMediumTargetText').innerHTML = '<span style="color:#9ca3af; font-weight:normal;">사망함 💀 (접신 없음)</span>';
+        } else {
+          document.getElementById('adminMediumTargetText').textContent = players[actions.mediumTarget]?.name ? `${players[actions.mediumTarget].name} (접신 완료)` : '접신 대기 중';
+        }
 
         // 판정 결과
         if (gameState.lastNightResult) {
