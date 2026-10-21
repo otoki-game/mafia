@@ -464,6 +464,45 @@
         <div id="dayVoteTargetList"></div>
       </div>
 
+      <!-- 낮 1차 투표 결과표 카드 (플레이어 공개용) -->
+      <div class="card" id="playerDayVoteResultCard" style="display: none; background: #f8fafc; border: 1.5px solid #cbd5e1;">
+        <div class="card-title">📊 낮 1차 투표 집계 결과</div>
+        <div id="playerVoteTallyList" style="font-size: 0.88rem; line-height: 1.6; margin-bottom: 8px;"></div>
+      </div>
+
+      <!-- 낮 2차 최후 변론 및 처형 찬반 투표 카드 -->
+      <div class="card" id="playerTrialCard" style="display: none; border: 2px solid #dc2626; background: #fff5f5;">
+        <div class="card-title" style="color: #b91c1c;">⚖️ 최후 변론 & 처형 찬반 투표</div>
+        <div style="background: white; border: 1px solid #fecaca; border-radius: 10px; padding: 12px; margin-bottom: 12px; text-align: center;">
+          <div style="font-size: 0.82rem; color: #7f1d1d; margin-bottom: 4px;">최다 득표 피고인</div>
+          <div id="trialDefendantName" style="font-size: 1.35rem; font-weight: 900; color: #dc2626; margin-bottom: 6px;">홍길동</div>
+          <p style="font-size: 0.8rem; color: #991b1b; line-height: 1.4;">
+            📢 <b>최후 변론을 경청하세요!</b><br>
+            피고인의 변론을 들은 후 처형할지 살릴지 비밀 투표하세요.
+          </p>
+        </div>
+
+        <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px; text-align: center;">
+          나의 찬반 투표 선택: <b id="myTrialVoteDisplay" style="color: #111827;">미투표</b>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-danger" style="flex: 1; padding: 14px 10px; font-size: 0.92rem;" onclick="submitTrialVote('guilty')">
+            💀 처형 찬성 (사형)
+          </button>
+          <button class="btn" style="flex: 1; padding: 14px 10px; font-size: 0.92rem; background: #059669; color: white;" onclick="submitTrialVote('innocent')">
+            🕊️ 처형 반대 (살리기)
+          </button>
+        </div>
+      </div>
+
+      <!-- 최종 처형 판결 결과 카드 -->
+      <div class="card" id="playerTrialResultCard" style="display: none; text-align: center; padding: 18px 14px;">
+        <div id="trialResultIcon" style="font-size: 2.2rem; margin-bottom: 6px;">⚖️</div>
+        <h3 id="trialResultTitle" style="font-size: 1.15rem; font-weight: 800; margin-bottom: 6px;">처형 결과</h3>
+        <p id="trialResultDesc" style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;"></p>
+      </div>
+
       <!-- 밤 액션 카드 (마피아/의사/경찰/영매) -->
       <div class="card" id="playerNightActionCard" style="display: none;">
         <div class="card-title" id="nightActionTitle">🌙 밤의 비밀 행동</div>
@@ -554,6 +593,7 @@
         <div style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 10px; line-height: 1.6;">
           <div>🔪 <b>마피아 지목:</b> <span id="adminMafiaTargetText" style="color: var(--mafia-red); font-weight:700;">대기 중</span></div>
           <div>💉 <b>의사 치료:</b> <span id="adminDoctorTargetText" style="color: var(--doctor-green); font-weight:700;">대기 중</span></div>
+          <div>🛡️ <b>군인 방어:</b> <span id="adminSoldierTargetText" style="color: var(--soldier-amber); font-weight:700;">대기 중</span></div>
           <div>🔍 <b>경찰 조사:</b> <span id="adminPoliceTargetText" style="color: var(--police-blue); font-weight:700;">대기 중</span></div>
           <div>👻 <b>영매 접신:</b> <span id="adminMediumTargetText" style="color: var(--medium-purple); font-weight:700;">대기 중</span></div>
           <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 8px 0;">
@@ -565,16 +605,48 @@
         </div>
       </div>
 
-      <!-- 낮 스마트폰 익명 투표 집계 현황 -->
+      <!-- 낮 스마트폰 재판 및 투표 진행 패널 -->
       <div class="card">
-        <div class="card-title">🗳️ 낮 스마트폰 익명 투표 현황</div>
-        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
-          투표 참여 인원: <b id="adminDayVoteCountText" style="color: var(--primary);">0</b> / <span id="adminAliveCountText">0</span>명 완료
+        <div class="card-title">⚖️ 낮 투표 및 재판 진행 패널</div>
+        
+        <!-- 단계 1: 1차 지목 투표 진행 중 -->
+        <div id="adminStep1Box">
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+            1차 지목 투표 참여: <b id="adminDayVoteCountText" style="color: var(--primary);">0</b> / <span id="adminAliveCountText">0</span>명 완료
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-vote" style="flex: 1.5;" onclick="closeAndTallyDayVote()">📢 1차 투표 마감 & 결과 발표</button>
+            <button class="btn btn-secondary" style="flex: 1; margin: 0;" onclick="resetDayVote()">🔄 다시 투표</button>
+          </div>
         </div>
-        <div id="adminDayVoteTallyBox" style="background: #f9fafb; border:1px solid #e5e7eb; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 10px; display: none;"></div>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-vote" style="flex: 1;" onclick="closeAndTallyDayVote()">📢 투표 마감 및 결과 발표</button>
-          <button class="btn btn-secondary" style="flex: 1; margin: 0;" onclick="resetDayVote()">🔄 투표 다시하기</button>
+
+        <!-- 1차 집계 결과 표시 박스 -->
+        <div id="adminDayVoteTallyBox" style="background: #f9fafb; border:1px solid #e5e7eb; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-top: 10px; display: none;"></div>
+
+        <!-- 단계 2: 2차 최후 변론 및 찬반 투표 진행 중 -->
+        <div id="adminStep2Box" style="display: none; margin-top: 10px; background: #fff5f5; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.9rem; font-weight: 800; color: #dc2626; margin-bottom: 6px;">
+            🎤 최다 득표 피고인: <span id="adminDefendantName"></span>
+          </div>
+          <p style="font-size: 0.8rem; color: #991b1b; margin-bottom: 10px; line-height: 1.4;">
+            📢 <b>사회자 멘트:</b> "[<span id="adminDefendantNameMent"></span>] 님, 억울함을 호소할 수 있는 최후 변론 시간을 드립니다!"
+          </p>
+          <div style="font-size: 0.82rem; color: #374151; margin-bottom: 8px;">
+            찬반 투표 참여 인원: <b id="adminTrialVoteCountText" style="color: #dc2626;">0</b> / <span id="adminTrialAliveCountText">0</span>명 완료
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-danger" style="flex: 1.5;" onclick="closeAndTallyTrialVote()">⚡ 찬반 투표 마감 & 최종 처형 집행</button>
+            <button class="btn btn-secondary" style="flex: 1; margin: 0;" onclick="resetDayVote()">🔄 1차로 복귀</button>
+          </div>
+        </div>
+
+        <!-- 단계 3: 최종 처형 판결 완료 후 -->
+        <div id="adminStep3Box" style="display: none; margin-top: 10px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px;">
+          <div id="adminTrialFinalSummary" style="font-weight: 700; font-size: 0.92rem; margin-bottom: 10px; line-height: 1.5;"></div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-night" style="flex: 1.5;" onclick="setGamePhase('night')">🌙 이제 밤 시작하기</button>
+            <button class="btn btn-secondary" style="flex: 1; margin: 0;" onclick="resetDayVote()">🔄 낮 투표 리셋</button>
+          </div>
         </div>
       </div>
 
@@ -710,11 +782,16 @@
       nightActions: {
         mafiaTargets: {},
         doctorTarget: null,
+        soldierTarget: null,
         policeTarget: null,
         mediumTarget: null
       },
+      dayStep: 'voting', // 'voting' (1차 지목) | 'verdict' (최후변론 & 찬반투표) | 'finished' (판결 완료)
       dayVotes: {},
       dayVoteResult: null,
+      trialTargetId: null,
+      trialVotes: {}, // { voterId: 'guilty' | 'innocent' }
+      trialResult: null,
       lastNightResult: null
     };
 
@@ -739,6 +816,7 @@
           if (!gameState.players) gameState.players = {};
           if (!gameState.nightActions) gameState.nightActions = {};
           if (!gameState.dayVotes) gameState.dayVotes = {};
+          if (!gameState.trialVotes) gameState.trialVotes = {};
 
           // 만약 내가 이미 관리자 권한을 가졌던 기기라면 자동 복구
           if (gameState.activeAdminDevice && gameState.activeAdminDevice === myDeviceToken) {
@@ -910,6 +988,7 @@
 
         const mafias = alive.filter(p => p.role === 'mafia');
         const doctors = alive.filter(p => p.role === 'doctor');
+        const soldiers = alive.filter(p => p.role === 'soldier');
         const polices = alive.filter(p => p.role === 'police');
         const mediums = alive.filter(p => p.role === 'medium');
 
@@ -926,6 +1005,13 @@
           }
         }
 
+        if (soldiers.length > 0) {
+          const solTargets = alive.filter(p => p.id !== soldiers[0].id);
+          if (solTargets.length > 0) {
+            gameState.nightActions.soldierTarget = solTargets[Math.floor(Math.random() * solTargets.length)].id;
+          }
+        }
+
         if (polices.length > 0) {
           const polTargets = alive.filter(p => p.id !== polices[0].id);
           if (polTargets.length > 0) {
@@ -939,16 +1025,29 @@
         }
 
         syncGameStateToCloud();
-        alert("⚡ 모든 가상 봇들이 밤 행동(마피아 암살, 의사 치료, 경찰 조사)을 완료했습니다!");
+        alert("⚡ 모든 가상 봇들이 밤 행동(마피아 암살, 의사 치료, 군인 방어, 경찰 조사)을 완료했습니다!");
 
       } else if (gameState.phase === 'day') {
-        if (!gameState.dayVotes) gameState.dayVotes = {};
-        alive.forEach(p => {
-          const randomVote = alive[Math.floor(Math.random() * alive.length)].id;
-          gameState.dayVotes[p.id] = randomVote;
-        });
-        syncGameStateToCloud();
-        alert("⚡ 모든 생존 참가자들이 낮 익명 투표를 완료했습니다!");
+        const dayStep = gameState.dayStep || 'voting';
+        if (dayStep === 'verdict') {
+          // 2차 찬반 투표 봇 자동화
+          if (!gameState.trialVotes) gameState.trialVotes = {};
+          alive.forEach(p => {
+            // 60% 확률로 찬성, 40% 확률로 반대
+            gameState.trialVotes[p.id] = Math.random() < 0.6 ? 'guilty' : 'innocent';
+          });
+          syncGameStateToCloud();
+          alert("⚡ 모든 생존 참가자들이 [처형 찬반 투표]를 완료했습니다!");
+        } else {
+          // 1차 지목 투표 봇 자동화
+          if (!gameState.dayVotes) gameState.dayVotes = {};
+          alive.forEach(p => {
+            const randomVote = alive[Math.floor(Math.random() * alive.length)].id;
+            gameState.dayVotes[p.id] = randomVote;
+          });
+          syncGameStateToCloud();
+          alert("⚡ 모든 생존 참가자들이 [낮 1차 지목 투표]를 완료했습니다!");
+        }
       } else {
         alert("게임 진행 중(낮 또는 밤)에만 자동 액션을 실행할 수 있습니다.");
       }
@@ -1050,9 +1149,13 @@
 
       gameState.phase = 'day';
       gameState.dayCount = 1;
-      gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null, mediumTarget: null };
+      gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, soldierTarget: null, policeTarget: null, mediumTarget: null };
+      gameState.dayStep = 'voting';
       gameState.dayVotes = {};
       gameState.dayVoteResult = null;
+      gameState.trialTargetId = null;
+      gameState.trialVotes = {};
+      gameState.trialResult = null;
       gameState.lastNightResult = null;
 
       syncGameStateToCloud();
@@ -1102,9 +1205,13 @@
 
       gameState.phase = 'day';
       gameState.dayCount = 1;
-      gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null, mediumTarget: null };
+      gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, soldierTarget: null, policeTarget: null, mediumTarget: null };
+      gameState.dayStep = 'voting';
       gameState.dayVotes = {};
       gameState.dayVoteResult = null;
+      gameState.trialTargetId = null;
+      gameState.trialVotes = {};
+      gameState.trialResult = null;
       gameState.lastNightResult = null;
 
       syncGameStateToCloud();
@@ -1116,14 +1223,17 @@
        ===================================================================== */
     function setGamePhase(phase) {
       gameState.phase = phase;
+      gameState.dayStep = 'voting';
+      gameState.dayVotes = {};
+      gameState.dayVoteResult = null;
+      gameState.trialTargetId = null;
+      gameState.trialVotes = {};
+      gameState.trialResult = null;
+
       if (phase === 'night') {
-        gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null, mediumTarget: null };
-        gameState.dayVotes = {};
-        gameState.dayVoteResult = null;
+        gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, soldierTarget: null, policeTarget: null, mediumTarget: null };
       } else if (phase === 'day') {
         calculateNightResult();
-        gameState.dayVotes = {};
-        gameState.dayVoteResult = null;
       }
       syncGameStateToCloud();
     }
@@ -1145,6 +1255,7 @@
       }
 
       const doctorTarget = actions.doctorTarget || null;
+      const soldierTarget = actions.soldierTarget || null;
       let killedPlayerId = null;
       let isSavedByDoctor = false;
       let isSavedBySoldier = false;
@@ -1152,14 +1263,12 @@
       if (mafiaTarget) {
         if (mafiaTarget === doctorTarget) {
           isSavedByDoctor = true;
-        } else {
-          const targetPlayer = gameState.players[mafiaTarget];
-          if (targetPlayer && targetPlayer.role === 'soldier' && targetPlayer.soldierArmor) {
-            isSavedBySoldier = true;
-            targetPlayer.soldierArmor = false;
-          } else {
-            killedPlayerId = mafiaTarget;
-          }
+        }
+        if (mafiaTarget === soldierTarget) {
+          isSavedBySoldier = true;
+        }
+        if (!isSavedByDoctor && !isSavedBySoldier) {
+          killedPlayerId = mafiaTarget;
         }
       }
 
@@ -1186,6 +1295,7 @@
       gameState.lastNightResult = {
         mafiaTarget: mafiaTarget,
         doctorTarget: doctorTarget,
+        soldierTarget: soldierTarget,
         killedPlayerId: killedPlayerId,
         isSavedByDoctor: isSavedByDoctor,
         isSavedBySoldier: isSavedBySoldier,
@@ -1208,18 +1318,19 @@
           syncGameStateToCloud();
           alert(`[${victim.name}] 님이 사망 처리되었습니다.`);
         }
+      } else if (isSavedBySoldier) {
+        alert("🛡️ 군인이 마피아의 공격을 받았지만 공격 방어에 성공했습니다! (사망자 없음)");
       } else if (isSavedByDoctor) {
         alert("🛡️ 의사의 치료 성공으로 지난밤 사망자가 없습니다!");
-      } else if (isSavedBySoldier) {
-        alert("🛡️ 군인이 마피아의 습격을 1회 방어해 내어 사망자가 없습니다!");
       } else {
         alert("지난밤 사망자가 없습니다.");
       }
     }
 
     /* =====================================================================
-       [9] 낮 익명 투표
+       [9] 낮 익명 투표 & 2단계 최후 변론 / 처형 찬반 투표 시스템
        ===================================================================== */
+    // 1차 지목 투표 제출
     function submitDayVote(targetId) {
       if (!myPlayerId || !gameState.players[myPlayerId] || !gameState.players[myPlayerId].isAlive) return;
 
@@ -1230,6 +1341,7 @@
       alert(`[${gameState.players[targetId].name}] 님에게 익명 투표를 완료했습니다.`);
     }
 
+    // 1차 투표 마감 & 최다 득표자 피고인 선정 (사회자)
     function closeAndTallyDayVote() {
       const votes = gameState.dayVotes || {};
       const tallies = {};
@@ -1250,6 +1362,11 @@
         }
       }
 
+      if (Object.keys(tallies).length === 0) {
+        alert("투표에 참여한 사람이 없습니다.");
+        return;
+      }
+
       const isTie = topCandidates.length > 1;
       const topTargetId = (!isTie && topCandidates.length === 1) ? topCandidates[0] : null;
 
@@ -1257,28 +1374,110 @@
         tallies: tallies,
         maxVotes: maxVotes,
         isTie: isTie,
-        topTargetId: topTargetId
+        topTargetId: topTargetId,
+        topCandidates: topCandidates
       };
 
       if (topTargetId) {
-        const target = gameState.players[topTargetId];
-        if (confirm(`투표 마감 결과:\n[${target.name}] 님이 ${maxVotes}표로 최다 득표했습니다.\n\n이 참가자를 처형(사망) 처리하시겠습니까?`)) {
-          target.isAlive = false;
-          alert(`[${target.name}] 님이 처형되었습니다.`);
-        }
+        // 단독 최다 득표자 발생 ➔ 2단계 최후 변론 및 찬반 투표 진입!
+        const defendant = gameState.players[topTargetId];
+        gameState.dayStep = 'verdict';
+        gameState.trialTargetId = topTargetId;
+        gameState.trialVotes = {};
+        gameState.trialResult = null;
+
+        alert(`📢 [1차 투표 마감 완료]\n\n[${defendant.name}] 님이 ${maxVotes}표로 최다 득표 피고인으로 지목되었습니다!\n\n모든 플레이어 화면에 투표 집계 결과와 찬반 투표창이 열렸습니다.\n사회자님은 피고인에게 최후 변론 시간을 부여해 주세요.`);
       } else if (isTie) {
-        alert(`동점표 발생! (${maxVotes}표 동점)\n동점으로 인해 오늘은 아무도 처형되지 않습니다.`);
-      } else {
-        alert("투표 참여자가 없습니다.");
+        // 동점 ➔ 처형 부결
+        gameState.dayStep = 'finished';
+        gameState.trialTargetId = null;
+        gameState.trialVotes = {};
+        gameState.trialResult = {
+          isExecuted: false,
+          reason: 'tie',
+          maxVotes: maxVotes
+        };
+
+        const tieNames = topCandidates.map(cid => gameState.players[cid]?.name || cid).join(', ');
+        alert(`⚖️ [동점표 발생! (${maxVotes}표 동점)]\n(${tieNames})\n\n동점자가 발생하여 오늘은 아무도 처형대에 오르지 않고 무효 처리됩니다.`);
       }
 
       syncGameStateToCloud();
     }
 
+    // 2차 처형 찬성 / 반대 비밀 투표 제출 (플레이어)
+    function submitTrialVote(voteType) {
+      if (!myPlayerId || !gameState.players[myPlayerId] || !gameState.players[myPlayerId].isAlive) {
+        alert("생존한 플레이어만 투표할 수 있습니다.");
+        return;
+      }
+
+      if (gameState.dayStep !== 'verdict') {
+        alert("현재는 찬반 투표 진행 시간이 아닙니다.");
+        return;
+      }
+
+      if (!gameState.trialVotes) gameState.trialVotes = {};
+      gameState.trialVotes[myPlayerId] = voteType;
+
+      syncGameStateToCloud();
+      if (voteType === 'guilty') {
+        alert("💀 [처형 찬성 (사형)] 에 투표하셨습니다.");
+      } else {
+        alert("🕊️ [처형 반대 (살리기)] 에 투표하셨습니다.");
+      }
+    }
+
+    // 2차 찬반 투표 마감 및 최종 처형 판결 집행 (사회자)
+    function closeAndTallyTrialVote() {
+      const defId = gameState.trialTargetId;
+      if (!defId || !gameState.players[defId]) {
+        alert("피고인 정보가 올바르지 않습니다.");
+        return;
+      }
+
+      const defendant = gameState.players[defId];
+      const votes = gameState.trialVotes || {};
+      const guiltyCount = Object.values(votes).filter(v => v === 'guilty').length;
+      const innocentCount = Object.values(votes).filter(v => v === 'innocent').length;
+
+      // 판정 규칙: 찬성이 반대보다 많으면 처형, 동점이거나 반대가 많으면 생존
+      const isExecuted = guiltyCount > innocentCount;
+
+      if (isExecuted) {
+        defendant.isAlive = false;
+        gameState.trialResult = {
+          isExecuted: true,
+          defendantId: defId,
+          defendantName: defendant.name,
+          guiltyCount: guiltyCount,
+          innocentCount: innocentCount
+        };
+        alert(`⚖️ [최종 판결: 처형 집행!]\n\n찬성: ${guiltyCount}표 vs 반대: ${innocentCount}표\n\n찬성이 우세하여 [${defendant.name}] 님이 최종 처형(사망)되었습니다.`);
+      } else {
+        gameState.trialResult = {
+          isExecuted: false,
+          defendantId: defId,
+          defendantName: defendant.name,
+          guiltyCount: guiltyCount,
+          innocentCount: innocentCount,
+          reason: 'voted_down'
+        };
+        alert(`🕊️ [최종 판결: 처형 부결 (생존)!]\n\n찬성: ${guiltyCount}표 vs 반대: ${innocentCount}표\n\n찬성 과반/우세를 얻지 못해 처형이 부결되었습니다.\n[${defendant.name}] 님은 살아남았습니다!`);
+      }
+
+      gameState.dayStep = 'finished';
+      syncGameStateToCloud();
+    }
+
     function resetDayVote() {
-      if (confirm("낮 투표를 초기화하시겠습니까?")) {
+      if (confirm("낮 투표 및 재판 상태를 초기화하시겠습니까?")) {
+        gameState.dayStep = 'voting';
         gameState.dayVotes = {};
         gameState.dayVoteResult = null;
+        gameState.trialTargetId = null;
+        gameState.trialVotes = {};
+        gameState.trialResult = null;
         syncGameStateToCloud();
       }
     }
@@ -1287,8 +1486,12 @@
       if (confirm("전체 게임을 초기화하고 대기실로 돌아가시겠습니까?")) {
         gameState.phase = 'lobby';
         gameState.nightActions = {};
+        gameState.dayStep = 'voting';
         gameState.dayVotes = {};
         gameState.dayVoteResult = null;
+        gameState.trialTargetId = null;
+        gameState.trialVotes = {};
+        gameState.trialResult = null;
         gameState.lastNightResult = null;
         Object.keys(gameState.players || {}).forEach(pid => {
           gameState.players[pid].role = 'citizen';
@@ -1308,7 +1511,7 @@
       if (!me.isAlive) return;
 
       if (!gameState.nightActions) {
-        gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null, mediumTarget: null };
+        gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, soldierTarget: null, policeTarget: null, mediumTarget: null };
       }
 
       if (me.role === 'mafia') {
@@ -1321,6 +1524,13 @@
         }
         gameState.nightActions.doctorTarget = targetId;
         alert(`[${gameState.players[targetId].name}] 님을 오늘 밤 치료합니다.`);
+      } else if (me.role === 'soldier') {
+        if (targetId === myPlayerId) {
+          alert("⚠️ 군인은 자기 자신을 방어할 수 없습니다!");
+          return;
+        }
+        gameState.nightActions.soldierTarget = targetId;
+        alert(`[${gameState.players[targetId].name}] 님을 오늘 밤 경호/방어합니다.`);
       } else if (me.role === 'police') {
         if (gameState.nightActions.policeTarget) {
           alert("⚠️ 경찰은 하룻밤에 1명만 조사할 수 있습니다. 이미 오늘 밤 조사를 완료하셨습니다!");
@@ -1429,11 +1639,8 @@
             roleBadge.textContent = '군인';
             roleName.textContent = '군인 🛡️';
             roleName.style.color = 'var(--soldier-amber)';
-            roleDesc.textContent = '마피아의 첫 암살 공격을 1회 방어합니다.';
-            roleExtra.style.display = 'block';
-            roleExtra.innerHTML = me.soldierArmor 
-              ? '<span style="color:var(--soldier-amber);">방어권: 1회 유효 🛡️</span>' 
-              : '<span style="color:var(--mafia-red);">방어권: 이미 소진됨 ❌</span>';
+            roleDesc.textContent = '밤마다 1명을 경호/방어합니다 (⚠️ 자기 자신 방어 불가). 지목한 사람이 마피아의 공격을 받으면 방어에 성공합니다!';
+            roleExtra.style.display = 'none';
           } else if (me.role === 'medium') {
             roleBadge.className = 'badge badge-medium';
             roleBadge.textContent = '영매';
@@ -1453,8 +1660,17 @@
             : '<span style="color: var(--mafia-red);">사망 💀 (관전자 모드)</span>';
 
           if (gameState.phase === 'day') {
+            const dayStep = gameState.dayStep || 'voting';
             document.getElementById('playerPhaseBanner').className = 'phase-banner phase-day';
-            document.getElementById('playerPhaseBanner').textContent = `☀️ 낮 시간 (토론 & 스마트폰 익명 투표)`;
+            
+            if (dayStep === 'voting') {
+              document.getElementById('playerPhaseBanner').textContent = `☀️ 낮 시간 (1차 마피아 지목 비밀 투표)`;
+            } else if (dayStep === 'verdict') {
+              document.getElementById('playerPhaseBanner').textContent = `⚖️ 낮 시간 (최후 변론 & 처형 찬반 투표)`;
+            } else {
+              document.getElementById('playerPhaseBanner').textContent = `☀️ 낮 시간 (투표 및 처형 판결 완료)`;
+            }
+
             document.getElementById('playerNightActionCard').style.display = 'none';
             document.getElementById('playerWaitingCard').style.display = 'none';
 
@@ -1494,8 +1710,10 @@
               reportCard.style.display = 'none';
             }
 
-            if (me.isAlive) {
-              document.getElementById('playerDayVoteCard').style.display = 'block';
+            // [단계 1] 1차 지목 투표 카드
+            const dayVoteCard = document.getElementById('playerDayVoteCard');
+            if (me.isAlive && dayStep === 'voting') {
+              dayVoteCard.style.display = 'block';
               const dayTargetList = document.getElementById('dayVoteTargetList');
               dayTargetList.innerHTML = '';
 
@@ -1515,16 +1733,113 @@
                 dayTargetList.appendChild(item);
               });
             } else {
-              document.getElementById('playerDayVoteCard').style.display = 'none';
+              dayVoteCard.style.display = 'none';
+            }
+
+            // [단계 2] 1차 투표 결과표 카드 (2차 재판 또는 판결 완료 시 공개)
+            const resultCard = document.getElementById('playerDayVoteResultCard');
+            if ((dayStep === 'verdict' || dayStep === 'finished') && gameState.dayVoteResult) {
+              resultCard.style.display = 'block';
+              const tallyListEl = document.getElementById('playerVoteTallyList');
+              const tallies = gameState.dayVoteResult.tallies || {};
+              let html = '<div style="margin-bottom:6px; font-weight:700; color:#334155;">투표 집계 현황:</div>';
+              
+              // 득표순 정렬
+              const sortedTallies = Object.entries(tallies).sort((a, b) => b[1] - a[1]);
+              sortedTallies.forEach(([tid, cnt]) => {
+                const pName = players[tid]?.name || tid;
+                const isTop = (gameState.dayVoteResult.topTargetId === tid);
+                html += `
+                  <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #e2e8f0; font-size:0.86rem;">
+                    <span style="${isTop ? 'font-weight:800; color:#dc2626;' : ''}">${pName} ${isTop ? '🔥(최다득표)' : ''}</span>
+                    <span style="font-weight:700; color:${isTop ? '#dc2626' : '#475569'};">${cnt}표</span>
+                  </div>
+                `;
+              });
+
+              if (gameState.dayVoteResult.isTie) {
+                html += `<div style="margin-top:8px; padding:6px; background:#fef3c7; border-radius:6px; color:#b45309; font-weight:700; text-align:center; font-size:0.82rem;">⚠️ 최다 득표 동점으로 처형 부결</div>`;
+              }
+              tallyListEl.innerHTML = html;
+            } else {
+              resultCard.style.display = 'none';
+            }
+
+            // [단계 3] 2차 최후 변론 및 찬반 투표 카드
+            const trialCard = document.getElementById('playerTrialCard');
+            if (dayStep === 'verdict' && gameState.trialTargetId) {
+              trialCard.style.display = 'block';
+              const def = players[gameState.trialTargetId];
+              document.getElementById('trialDefendantName').textContent = def ? def.name : '알 수 없음';
+
+              const myTrialVoteDisplay = document.getElementById('myTrialVoteDisplay');
+              const myTrialVote = gameState.trialVotes?.[myPlayerId];
+              if (myTrialVote === 'guilty') {
+                myTrialVoteDisplay.innerHTML = '<span style="color:#dc2626; font-weight:800;">💀 처형 찬성 (사형) 선택완료 ✓</span>';
+              } else if (myTrialVote === 'innocent') {
+                myTrialVoteDisplay.innerHTML = '<span style="color:#059669; font-weight:800;">🕊️ 처형 반대 (살리기) 선택완료 ✓</span>';
+              } else {
+                myTrialVoteDisplay.innerHTML = '<span style="color:#9ca3af; font-weight:700;">미투표 (아래 버튼으로 선택)</span>';
+              }
+            } else {
+              trialCard.style.display = 'none';
+            }
+
+            // [단계 4] 최종 처형 판결 결과 카드
+            const trialResultCard = document.getElementById('playerTrialResultCard');
+            if (dayStep === 'finished' && (gameState.trialResult || gameState.dayVoteResult)) {
+              trialResultCard.style.display = 'block';
+              const iconEl = document.getElementById('trialResultIcon');
+              const titleEl = document.getElementById('trialResultTitle');
+              const descEl = document.getElementById('trialResultDesc');
+              const tRes = gameState.trialResult;
+
+              if (tRes?.isExecuted) {
+                trialResultCard.style.background = '#fff5f5';
+                trialResultCard.style.border = '2px solid #f87171';
+                iconEl.textContent = '💀';
+                titleEl.textContent = `[${tRes.defendantName}] 처형 집행`;
+                titleEl.style.color = '#dc2626';
+                descEl.innerHTML = `
+                  찬성 <b>${tRes.guiltyCount}</b>표 vs 반대 <b>${tRes.innocentCount}</b>표로<br>
+                  찬성이 우세하여 <b>${tRes.defendantName}</b> 님이 최종 처형되었습니다.
+                `;
+              } else if (tRes?.reason === 'voted_down') {
+                trialResultCard.style.background = '#f0fdf4';
+                trialResultCard.style.border = '2px solid #86efac';
+                iconEl.textContent = '🕊️';
+                titleEl.textContent = `[${tRes.defendantName}] 처형 부결 (생존!)`;
+                titleEl.style.color = '#15803d';
+                descEl.innerHTML = `
+                  찬성 <b>${tRes.guiltyCount}</b>표 vs 반대 <b>${tRes.innocentCount}</b>표로<br>
+                  찬성 과반을 얻지 못해 <b>${tRes.defendantName}</b> 님은 살아남았습니다!
+                `;
+              } else if (tRes?.reason === 'tie' || gameState.dayVoteResult?.isTie) {
+                trialResultCard.style.background = '#fffbeb';
+                trialResultCard.style.border = '2px solid #fcd34d';
+                iconEl.textContent = '⚖️';
+                titleEl.textContent = `동점표 발생 (처형 무효)`;
+                titleEl.style.color = '#b45309';
+                descEl.innerHTML = `
+                  1차 지목 투표에서 동점표가 발생하여<br>
+                  오늘 낮은 아무도 처형대에 오르지 않았습니다.
+                `;
+              }
+            } else {
+              trialResultCard.style.display = 'none';
             }
 
           } else {
-            // 밤
+            // 밤 시간 (낮 관련 카드 숨김)
+            document.getElementById('playerDayVoteResultCard').style.display = 'none';
+            document.getElementById('playerTrialCard').style.display = 'none';
+            document.getElementById('playerTrialResultCard').style.display = 'none';
+            document.getElementById('playerNightReportCard').style.display = 'none';
             document.getElementById('playerPhaseBanner').className = 'phase-banner phase-night';
             document.getElementById('playerPhaseBanner').textContent = '🌙 밤 시간 (마피아/특수직업 행동 중)';
             document.getElementById('playerDayVoteCard').style.display = 'none';
 
-            if (me.isAlive && ['mafia', 'doctor', 'police', 'medium'].includes(me.role)) {
+            if (me.isAlive && ['mafia', 'doctor', 'soldier', 'police', 'medium'].includes(me.role)) {
               document.getElementById('playerNightActionCard').style.display = 'block';
               document.getElementById('playerWaitingCard').style.display = 'none';
 
@@ -1585,6 +1900,29 @@
                     <span style="font-weight:700;">${target.name} ${isMe ? '<small style="color:var(--mafia-red); font-weight:normal;">(자기 자신 불가)</small>' : ''}</span>
                     <span style="font-size:0.8rem; color:${isSelected ? 'var(--doctor-green)' : 'var(--text-muted)'}; font-weight:700;">
                       ${isMe ? '선택불가' : (isSelected ? '선택됨 ✓' : '치료')}
+                    </span>
+                  `;
+                  if (!isMe) {
+                    item.onclick = () => submitPlayerNightAction(target.id);
+                  }
+                  targetListEl.appendChild(item);
+                });
+
+              // [3] 군인
+              } else if (me.role === 'soldier') {
+                titleEl.textContent = '🛡️ 군인 경호 방어 대상 선택';
+                subEl.textContent = '마피아의 공격으로부터 지킬 사람을 선택하세요 (⚠️ 자기 자신 불가):';
+
+                alivePlayers.forEach(target => {
+                  const isMe = (target.id === me.id);
+                  const isSelected = (gameState.nightActions?.soldierTarget === target.id);
+
+                  const item = document.createElement('div');
+                  item.className = 'action-target-item' + (isMe ? ' disabled' : (isSelected ? ' selected' : ''));
+                  item.innerHTML = `
+                    <span style="font-weight:700;">${target.name} ${isMe ? '<small style="color:var(--mafia-red); font-weight:normal;">(자기 자신 불가)</small>' : ''}</span>
+                    <span style="font-size:0.8rem; color:${isSelected ? 'var(--soldier-amber)' : 'var(--text-muted)'}; font-weight:700;">
+                      ${isMe ? '선택불가' : (isSelected ? '방어선택됨 ✓' : '방어/경호')}
                     </span>
                   `;
                   if (!isMe) {
@@ -1718,6 +2056,7 @@
         const actions = gameState.nightActions || {};
         const aliveMafias = alivePlayers.filter(p => p.role === 'mafia');
         const aliveDoctors = alivePlayers.filter(p => p.role === 'doctor');
+        const aliveSoldiers = alivePlayers.filter(p => p.role === 'soldier');
         const alivePolices = alivePlayers.filter(p => p.role === 'police');
         const aliveMediums = alivePlayers.filter(p => p.role === 'medium');
 
@@ -1734,6 +2073,13 @@
           document.getElementById('adminDoctorTargetText').innerHTML = '<span style="color:#9ca3af; font-weight:normal;">사망함 💀 (치료 없음)</span>';
         } else {
           document.getElementById('adminDoctorTargetText').textContent = players[actions.doctorTarget]?.name || '선택 대기 중';
+        }
+
+        // 군인 상태
+        if (aliveSoldiers.length === 0) {
+          document.getElementById('adminSoldierTargetText').innerHTML = '<span style="color:#9ca3af; font-weight:normal;">사망함 💀 (방어 없음)</span>';
+        } else {
+          document.getElementById('adminSoldierTargetText').textContent = players[actions.soldierTarget]?.name || '선택 대기 중';
         }
 
         // 경찰 상태
@@ -1757,39 +2103,97 @@
           if (r.killedPlayerId) {
             conclusionEl.textContent = `💥 [${players[r.killedPlayerId]?.name}] 님 암살 성공 (사망)`;
             conclusionEl.style.color = 'var(--mafia-red)';
+          } else if (r.isSavedBySoldier) {
+            conclusionEl.textContent = `🛡️ 군인이 마피아의 공격을 받았지만 공격 방어에 성공했습니다! (사망자 없음)`;
+            conclusionEl.style.color = 'var(--soldier-amber)';
           } else if (r.isSavedByDoctor) {
             conclusionEl.textContent = `🛡️ 의사 치료 성공! (사망자 없음)`;
             conclusionEl.style.color = 'var(--doctor-green)';
-          } else if (r.isSavedBySoldier) {
-            conclusionEl.textContent = `🛡️ 군인 1회 방어 발동! (사망자 없음)`;
-            conclusionEl.style.color = 'var(--soldier-amber)';
           } else {
             conclusionEl.textContent = `평화로운 밤 (사망자 없음)`;
             conclusionEl.style.color = 'var(--primary)';
           }
         }
 
-        // 낮 익명 투표 관리자 현황
-        const dayVotes = gameState.dayVotes || {};
-        const voteCount = Object.keys(dayVotes).length;
-        document.getElementById('adminDayVoteCountText').textContent = voteCount;
-        document.getElementById('adminAliveCountText').textContent = alivePlayers.length;
-
+        // 낮 투표 & 재판 관리자 컨트롤 패널 스텝 제어
+        const adminStep1 = document.getElementById('adminStep1Box');
+        const adminStep2 = document.getElementById('adminStep2Box');
+        const adminStep3 = document.getElementById('adminStep3Box');
         const tallyBox = document.getElementById('adminDayVoteTallyBox');
-        if (gameState.dayVoteResult) {
-          tallyBox.style.display = 'block';
-          const tallies = gameState.dayVoteResult.tallies || {};
-          let html = '<b style="color:#111827;">📊 낮 투표 최종 결과 집계:</b><br>';
-          for (const [tid, cnt] of Object.entries(tallies)) {
-            html += `• ${players[tid]?.name || tid}: <b>${cnt}표</b><br>`;
+        const dayStep = gameState.dayStep || 'voting';
+
+        if (gameState.phase === 'day') {
+          if (dayStep === 'voting') {
+            adminStep1.style.display = 'block';
+            adminStep2.style.display = 'none';
+            adminStep3.style.display = 'none';
+
+            const dayVotes = gameState.dayVotes || {};
+            document.getElementById('adminDayVoteCountText').textContent = Object.keys(dayVotes).length;
+            document.getElementById('adminAliveCountText').textContent = alivePlayers.length;
+
+          } else if (dayStep === 'verdict') {
+            adminStep1.style.display = 'none';
+            adminStep2.style.display = 'block';
+            adminStep3.style.display = 'none';
+
+            const def = players[gameState.trialTargetId];
+            const defName = def ? def.name : '알 수 없음';
+            document.getElementById('adminDefendantName').textContent = defName;
+            document.getElementById('adminDefendantNameMent').textContent = defName;
+
+            const trialVotes = gameState.trialVotes || {};
+            document.getElementById('adminTrialVoteCountText').textContent = Object.keys(trialVotes).length;
+            document.getElementById('adminTrialAliveCountText').textContent = alivePlayers.length;
+
+          } else if (dayStep === 'finished') {
+            adminStep1.style.display = 'none';
+            adminStep2.style.display = 'none';
+            adminStep3.style.display = 'block';
+
+            const summaryEl = document.getElementById('adminTrialFinalSummary');
+            const tRes = gameState.trialResult;
+            if (tRes?.isExecuted) {
+              summaryEl.innerHTML = `
+                <div style="color:#dc2626; font-size:1.1rem; font-weight:800; margin-bottom:4px;">💀 [${tRes.defendantName}] 처형 집행 완료</div>
+                <div style="font-size:0.85rem; color:#4b5563;">찬성 ${tRes.guiltyCount}표 vs 반대 ${tRes.innocentCount}표 (처형 확정)</div>
+              `;
+            } else if (tRes?.reason === 'voted_down') {
+              summaryEl.innerHTML = `
+                <div style="color:#059669; font-size:1.1rem; font-weight:800; margin-bottom:4px;">🕊️ [${tRes.defendantName}] 처형 부결 (생존)</div>
+                <div style="font-size:0.85rem; color:#4b5563;">찬성 ${tRes.guiltyCount}표 vs 반대 ${tRes.innocentCount}표 (과반 미달로 석방)</div>
+              `;
+            } else if (tRes?.reason === 'tie' || gameState.dayVoteResult?.isTie) {
+              summaryEl.innerHTML = `
+                <div style="color:#b45309; font-size:1.1rem; font-weight:800; margin-bottom:4px;">⚖️ 동점표로 처형 무효</div>
+                <div style="font-size:0.85rem; color:#4b5563;">1차 투표 동점 (${gameState.dayVoteResult?.maxVotes || 0}표) 발생으로 아무도 처형되지 않았습니다.</div>
+              `;
+            }
           }
-          if (gameState.dayVoteResult.isTie) {
-            html += `<span style="color:#d97706; font-weight:700;">⚠️ 동점표로 인해 처형 무효</span>`;
-          } else if (gameState.dayVoteResult.topTargetId) {
-            html += `<span style="color:var(--mafia-red); font-weight:700;">👉 최다 득표: [${players[gameState.dayVoteResult.topTargetId]?.name}]</span>`;
+
+          // 1차 집계 결과 박스 (결과가 있을 때 표시)
+          if (gameState.dayVoteResult) {
+            tallyBox.style.display = 'block';
+            const tallies = gameState.dayVoteResult.tallies || {};
+            let html = '<b style="color:#111827;">📊 낮 1차 투표 집계 현황:</b><br>';
+            const sortedTallies = Object.entries(tallies).sort((a, b) => b[1] - a[1]);
+            sortedTallies.forEach(([tid, cnt]) => {
+              const isTop = (gameState.dayVoteResult.topTargetId === tid);
+              html += `• ${players[tid]?.name || tid}: <b style="${isTop ? 'color:#dc2626;' : ''}">${cnt}표</b> ${isTop ? '🔥(피고인 지목)' : ''}<br>`;
+            });
+            if (gameState.dayVoteResult.isTie) {
+              html += `<span style="color:#d97706; font-weight:700;">⚠️ 동점표로 인해 처형 무효</span>`;
+            }
+            tallyBox.innerHTML = html;
+          } else {
+            tallyBox.style.display = 'none';
           }
-          tallyBox.innerHTML = html;
+
         } else {
+          // 낮이 아닐 때
+          adminStep1.style.display = 'block';
+          adminStep2.style.display = 'none';
+          adminStep3.style.display = 'none';
           tallyBox.style.display = 'none';
         }
 
