@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>야유회 모바일 마피아 게임</title>
   
-  <!-- 구글 폰트 (Pretendard 스타일) -->
+  <!-- 구글 폰트 (Pretendard) -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   
@@ -23,8 +23,10 @@
       --mafia-red: #ef4444;
       --doctor-green: #10b981;
       --police-blue: #3b82f6;
+      --medium-purple: #a855f7;
+      --soldier-amber: #f59e0b;
       --citizen-gray: #9ca3af;
-      --gold: #f59e0b;
+      --gold: #fbbf24;
       --text: #f3f4f6;
       --text-muted: #9ca3af;
     }
@@ -49,7 +51,7 @@
 
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       margin: 0 auto;
       padding-bottom: 30px;
     }
@@ -57,16 +59,16 @@
     /* 상단 헤더 */
     .header {
       text-align: center;
-      padding: 16px 0 20px;
+      padding: 14px 0 18px;
     }
     .header h1 {
-      font-size: 1.5rem;
+      font-size: 1.55rem;
       font-weight: 800;
       letter-spacing: -0.5px;
       background: linear-gradient(135deg, #f43f5e, #a855f7, #6366f1);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .header p {
       font-size: 0.85rem;
@@ -78,15 +80,15 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
     .card-title {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -95,12 +97,12 @@
     /* 인풋 및 버튼 */
     input[type="text"], input[type="password"], select {
       width: 100%;
-      padding: 14px 16px;
+      padding: 13px 15px;
       background: #12141c;
       border: 1px solid var(--card-border);
       border-radius: 12px;
       color: #fff;
-      font-size: 1rem;
+      font-size: 0.95rem;
       margin-bottom: 12px;
       outline: none;
       transition: border 0.2s;
@@ -111,8 +113,8 @@
 
     .btn {
       width: 100%;
-      padding: 14px 18px;
-      font-size: 1rem;
+      padding: 13px 16px;
+      font-size: 0.95rem;
       font-weight: 700;
       border-radius: 12px;
       border: none;
@@ -121,35 +123,17 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-    .btn-primary:active {
-      transform: scale(0.98);
-      background: var(--primary-hover);
-    }
-    .btn-secondary {
-      background: #252a38;
-      color: #e2e8f0;
-      margin-top: 8px;
-    }
-    .btn-danger {
-      background: var(--mafia-red);
-      color: white;
-    }
-    .btn-night {
-      background: #312e81;
-      color: #c7d2fe;
-    }
-    .btn-day {
-      background: #b45309;
-      color: #fef3c7;
-    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:active { transform: scale(0.98); background: var(--primary-hover); }
+    .btn-secondary { background: #252a38; color: #e2e8f0; margin-top: 8px; }
+    .btn-danger { background: var(--mafia-red); color: white; }
+    .btn-night { background: #312e81; color: #c7d2fe; }
+    .btn-day { background: #b45309; color: #fef3c7; }
+    .btn-vote { background: #047857; color: #d1fae5; }
 
-    /* 배지 및 태그 */
+    /* 배지 스타일 */
     .badge {
       display: inline-block;
       padding: 4px 8px;
@@ -160,6 +144,8 @@
     .badge-mafia { background: rgba(239, 68, 68, 0.2); color: var(--mafia-red); border: 1px solid var(--mafia-red); }
     .badge-doctor { background: rgba(16, 185, 129, 0.2); color: var(--doctor-green); border: 1px solid var(--doctor-green); }
     .badge-police { background: rgba(59, 130, 246, 0.2); color: var(--police-blue); border: 1px solid var(--police-blue); }
+    .badge-medium { background: rgba(168, 85, 247, 0.2); color: var(--medium-purple); border: 1px solid var(--medium-purple); }
+    .badge-soldier { background: rgba(245, 158, 11, 0.2); color: var(--soldier-amber); border: 1px solid var(--soldier-amber); }
     .badge-citizen { background: rgba(156, 163, 175, 0.2); color: var(--citizen-gray); border: 1px solid var(--citizen-gray); }
 
     /* 화면 전환용 */
@@ -171,20 +157,20 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 8px;
-      margin: 12px 0;
+      margin: 10px 0;
     }
     .player-chip {
       background: #131620;
       border: 1px solid var(--card-border);
       padding: 10px 12px;
       border-radius: 10px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
     .player-chip.dead {
-      opacity: 0.4;
+      opacity: 0.45;
       text-decoration: line-through;
       background: #090a0f;
     }
@@ -193,23 +179,23 @@
     .role-reveal-box {
       border: 2px dashed var(--card-border);
       border-radius: 16px;
-      padding: 30px 20px;
+      padding: 24px 18px;
       text-align: center;
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
       transition: all 0.2s;
       background: #131622;
-      margin: 16px 0;
+      margin: 14px 0;
     }
     .role-reveal-box:active, .role-reveal-box.revealed {
       border-color: var(--primary);
       background: #1c2132;
     }
     .role-name {
-      font-size: 1.8rem;
+      font-size: 1.7rem;
       font-weight: 900;
-      margin: 10px 0;
+      margin: 10px 0 6px;
     }
 
     /* 타겟 선택 리스트 */
@@ -217,7 +203,7 @@
       background: #141724;
       border: 1px solid var(--card-border);
       border-radius: 12px;
-      padding: 14px 16px;
+      padding: 12px 14px;
       margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
@@ -229,16 +215,37 @@
       border-color: var(--primary);
       background: #252b42;
     }
+    .action-target-item.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: #222;
+    }
+
+    /* 마피아 실시간 투표 칩 태그 */
+    .mafia-voter-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .mafia-tag {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
 
     /* 탭 메뉴 */
     .tabs {
       display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
+      gap: 6px;
+      margin-bottom: 14px;
     }
     .tab-btn {
       flex: 1;
-      padding: 10px;
+      padding: 9px;
       background: #131622;
       border: 1px solid var(--card-border);
       color: var(--text-muted);
@@ -255,11 +262,12 @@
 
     /* 페이즈 알림 배너 */
     .phase-banner {
-      padding: 14px;
+      padding: 12px;
       border-radius: 12px;
       text-align: center;
       font-weight: 800;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      font-size: 0.95rem;
     }
     .phase-night {
       background: linear-gradient(135deg, #1e1b4b, #312e81);
@@ -272,28 +280,33 @@
       border: 1px solid #b45309;
     }
 
-    /* 관리자 수동 지정 테이블 */
-    .manual-assign-item {
-      background: #131620;
+    /* 체크박스 그룹 */
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+    .checkbox-label {
+      background: #12141c;
       border: 1px solid var(--card-border);
-      border-radius: 10px;
       padding: 10px 12px;
-      margin-bottom: 8px;
+      border-radius: 10px;
+      font-size: 0.85rem;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
     }
 
-    /* 설정 가이드 모달 */
-    .guide-box {
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      line-height: 1.5;
-      color: #c7d2fe;
-      margin-bottom: 16px;
+    /* 직업 설명 사전 모달/박스 */
+    .role-guide-item {
+      padding: 10px 12px;
+      background: #131620;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      font-size: 0.82rem;
+      line-height: 1.45;
     }
   </style>
 </head>
@@ -306,13 +319,8 @@
       <p id="subHeaderStatus">오프라인 실시간 스마트폰 마피아</p>
     </div>
 
-    <!-- Firebase 설정 알림 (초기 미설정 시 안내) -->
-    <div id="firebaseConfigNotice" class="guide-box" style="display: none;">
-      ⚙️ <b>안내</b>: Firebase 실시간 DB 키가 아직 설정되지 않아 <b>[로컬 테스트 모드]</b>로 동작합니다. 실제 야유회 배포 시에는 코드 상단의 `firebaseConfig`를 입력해 주세요.
-    </div>
-
     <!-- ============================================== -->
-    <!-- 1. 입장 화면 (첫 접속 화면) -->
+    <!-- 1. 로그인/입장 화면 -->
     <!-- ============================================== -->
     <div id="screenLogin" class="screen active">
       <div class="card">
@@ -327,27 +335,38 @@
       <div class="card">
         <div class="card-title">👑 사회자(관리자) 접속</div>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
-          게임 진행 및 역할을 지정할 관리자는 비밀번호를 입력하세요.
+          진행 및 역할을 지정할 관리자는 비밀번호를 입력하세요.
         </p>
         <input type="password" id="inputAdminPassword" placeholder="관리자 비밀번호 (기본: admin1234)">
         <button class="btn btn-secondary" onclick="loginAsAdmin()">사회자 모드 열기</button>
       </div>
+
+      <!-- 직업 도감 설명 -->
+      <div class="card">
+        <div class="card-title">📖 등장 직업 설명서</div>
+        <div class="role-guide-item"><b style="color:var(--mafia-red);">🔪 마피아:</b> 밤마다 동료들과 상의하여 시민 1명을 암살합니다. (동료끼리 실시간 투표 공유)</div>
+        <div class="role-guide-item"><b style="color:var(--doctor-green);">💉 의사:</b> 밤마다 1명을 치료하여 마피아의 암살을 막습니다. (⚠️ <b>자기 자신은 치료 불가</b>)</div>
+        <div class="role-guide-item"><b style="color:var(--police-blue);">🔍 경찰:</b> 밤마다 1명의 정체를 조사하여 마피아 여부를 즉시 알아냅니다.</div>
+        <div class="role-guide-item"><b style="color:var(--soldier-amber);">🛡️ 군인:</b> 마피아의 첫 번째 암살 공격을 <b>1회 방어</b>해 냅니다.</div>
+        <div class="role-guide-item"><b style="color:var(--medium-purple);">👻 영매:</b> 밤마다 <b>사망한 사람 1명</b>을 선택해 그 사람의 진짜 정체(마피아/시민팀)를 확인합니다.</div>
+        <div class="role-guide-item"><b style="color:var(--citizen-gray);">🕊️ 시민:</b> 선량한 시민입니다. 낮에 토론과 스마트폰 익명 투표로 마피아를 찾아냅니다.</div>
+      </div>
     </div>
 
     <!-- ============================================== -->
-    <!-- 2. 플레이어 대기실 및 게임 화면 -->
+    <!-- 2. 플레이어 화면 -->
     <!-- ============================================== -->
     <div id="screenPlayer" class="screen">
-      <!-- 페이즈 표시 배너 -->
+      <!-- 페이즈 배너 -->
       <div id="playerPhaseBanner" class="phase-banner phase-day" style="display: none;">
-        ☀️ 낮 시간 (토론 중)
+        ☀️ 낮 시간
       </div>
 
-      <!-- 직업 비밀 확인 카드 -->
+      <!-- 내 직업 확인 카드 -->
       <div class="card" id="playerRoleCard" style="display: none;">
         <div class="card-title">🎭 나의 비밀 역할</div>
         <p style="font-size: 0.8rem; color: var(--text-muted);">
-          옆 사람이 보지 못하게 주의하세요! 아래 버튼을 누르는 동안만 보입니다.
+          옆 사람이 보지 못하게 주의하세요! 아래 박스를 누르는 동안만 보입니다.
         </p>
         
         <div class="role-reveal-box" id="roleRevealBox" 
@@ -360,73 +379,105 @@
           <div id="roleVisibleText" style="display: none;">
             <div id="myRoleBadge" class="badge">역할</div>
             <div id="myRoleName" class="role-name">마피아</div>
-            <div id="myRoleDesc" style="font-size: 0.85rem; color: #cbd5e1;">밤에 시민을 암살합니다.</div>
-            <div id="myMafiaComrades" style="margin-top: 10px; font-size: 0.85rem; color: var(--gold); font-weight: 700; display: none;"></div>
+            <div id="myRoleDesc" style="font-size: 0.83rem; color: #cbd5e1; line-height: 1.4;">직업 설명</div>
+            <div id="myRoleExtra" style="margin-top: 10px; font-size: 0.85rem; font-weight: 700;"></div>
           </div>
         </div>
 
-        <div style="font-size: 0.8rem; text-align: center; color: var(--text-muted);">
-          내 상태: <b id="myLifeStatus" style="color: var(--doctor-green);">생존 중 🟢</b>
+        <div style="font-size: 0.85rem; text-align: center;">
+          내 생존 상태: <b id="myLifeStatus">생존 중 🟢</b>
         </div>
       </div>
 
-      <!-- 밤 액션 화면 (마피아/의사/경찰) -->
+      <!-- 낮 시간 익명 처형 투표 카드 (NEW) -->
+      <div class="card" id="playerDayVoteCard" style="display: none;">
+        <div class="card-title">🗳️ 낮 익명 처형 투표소</div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px;">
+          토론 후 마피아로 의심되는 1명에게 비밀 투표하세요. (완전 익명 보장)
+        </p>
+        <div id="dayVoteTargetList"></div>
+      </div>
+
+      <!-- 밤 액션 카드 (마피아/의사/경찰/영매) -->
       <div class="card" id="playerNightActionCard" style="display: none;">
         <div class="card-title" id="nightActionTitle">🌙 밤의 비밀 행동</div>
-        <p id="nightActionSub" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+        <p id="nightActionSub" style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
           대상을 선택해 주세요.
         </p>
+        
+        <!-- 마피아 실시간 동료 현황 알림 -->
+        <div id="mafiaComradesStatusBox" style="display: none; background: #201317; border: 1px solid #7f1d1d; border-radius: 10px; padding: 10px; margin-bottom: 12px; font-size: 0.82rem;">
+          <b style="color: var(--mafia-red);">🤝 마피아 팀 실시간 지목 현황:</b>
+          <div id="mafiaComradesVoteDetails" style="margin-top: 4px; color: #fca5a5;"></div>
+        </div>
+
         <div id="nightTargetList"></div>
       </div>
 
-      <!-- 일반 대기 화면 (시민 밤 대기 또는 사망자) -->
-      <div class="card" id="playerWaitingCard" style="text-align: center; padding: 30px 20px;">
-        <span style="font-size: 2.5rem;" id="waitingIcon">⏳</span>
-        <h3 id="waitingTitle" style="margin: 12px 0 6px;">게임 시작 대기 중</h3>
+      <!-- 대기 화면 (시민 밤 대기 또는 로비) -->
+      <div class="card" id="playerWaitingCard" style="text-align: center; padding: 24px 16px;">
+        <span style="font-size: 2.3rem;" id="waitingIcon">⏳</span>
+        <h3 id="waitingTitle" style="margin: 10px 0 6px; font-size: 1.15rem;">게임 시작 대기 중</h3>
         <p id="waitingDesc" style="font-size: 0.85rem; color: var(--text-muted);">
           사회자가 인원을 모아 게임을 시작하기를 기다리고 있습니다...
         </p>
       </div>
 
-      <!-- 생존자 명단 -->
+      <!-- 참가자 명단 -->
       <div class="card">
-        <div class="card-title">👥 현재 참가자 명단 (<span id="playerTotalCount">0</span>명)</div>
+        <div class="card-title">👥 참가자 현황 (<span id="playerTotalCount">0</span>명)</div>
         <div id="playerListGrid" class="player-list"></div>
       </div>
     </div>
 
     <!-- ============================================== -->
-    <!-- 3. 사회자 (관리자) 컨트롤 화면 -->
+    <!-- 3. 사회자(관리자) 컨트롤 화면 -->
     <!-- ============================================== -->
     <div id="screenAdmin" class="screen">
-      <!-- 상태 요약 및 페이즈 제어 -->
+      <!-- 페이즈 제어 -->
       <div class="card">
         <div class="card-title">👑 사회자 컨트롤 패널</div>
-        <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
           <button class="btn btn-night" style="flex: 1;" onclick="setGamePhase('night')">🌙 밤 시작하기</button>
-          <button class="btn btn-day" style="flex: 1;" onclick="setGamePhase('day')">☀️ 낮 시작 (집계)</button>
+          <button class="btn btn-day" style="flex: 1;" onclick="setGamePhase('day')">☀️ 낮 시작 (밤 집계)</button>
         </div>
         <div style="font-size: 0.85rem; color: var(--text-muted);">
           현재 상태: <b id="adminPhaseDisplay" style="color: #fff;">대기실</b>
         </div>
       </div>
 
-      <!-- 밤 행동 결과 자동 집계 박스 -->
+      <!-- 밤 행동 결과 자동 집계 현황 -->
       <div class="card" id="adminNightResultCard">
-        <div class="card-title">📊 밤 결과 자동 집계 현황</div>
-        <div style="background: #111420; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 10px;">
-          <div>🔪 <b>마피아 타겟:</b> <span id="adminMafiaTargetText" style="color: var(--mafia-red);">선택 대기 중</span></div>
-          <div>💉 <b>의사 힐 대상:</b> <span id="adminDoctorTargetText" style="color: var(--doctor-green);">선택 대기 중</span></div>
-          <div>🔍 <b>경찰 조사:</b> <span id="adminPoliceTargetText" style="color: var(--police-blue);">조사 대기 중</span></div>
+        <div class="card-title">📊 밤 행동 자동 집계 현황</div>
+        <div style="background: #111420; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 10px; line-height: 1.6;">
+          <div>🔪 <b>마피아 지목:</b> <span id="adminMafiaTargetText" style="color: var(--mafia-red);">대기 중</span></div>
+          <div>💉 <b>의사 치료:</b> <span id="adminDoctorTargetText" style="color: var(--doctor-green);">대기 중</span></div>
+          <div>🔍 <b>경찰 조사:</b> <span id="adminPoliceTargetText" style="color: var(--police-blue);">대기 중</span></div>
+          <div>👻 <b>영매 접신:</b> <span id="adminMediumTargetText" style="color: var(--medium-purple);">대기 중</span></div>
           <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 8px 0;">
-          <div>📢 <b>결과 판정:</b> <span id="adminNightConclusion" style="font-weight: 800; color: var(--gold);">밤이 끝나면 계산됩니다.</span></div>
+          <div>📢 <b>밤 결과 판정:</b> <span id="adminNightConclusion" style="font-weight: 800; color: var(--gold);">밤이 끝나면 계산됩니다.</span></div>
         </div>
         <button class="btn btn-secondary" onclick="applyNightDeath()">⚰️ 판정 사망자 적용하기</button>
       </div>
 
-      <!-- 역할 배정 설정 (수동 지정 vs 랜덤 배정) -->
+      <!-- 낮 스마트폰 익명 투표 집계 현황 (NEW) -->
       <div class="card">
-        <div class="card-title">🎭 역할 배정 설정</div>
+        <div class="card-title">🗳️ 낮 스마트폰 익명 투표 현황</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
+          투표 참여 인원: <b id="adminDayVoteCountText" style="color: var(--primary);">0</b> / <span id="adminAliveCountText">0</span>명 완료
+        </div>
+        <div id="adminDayVoteTallyBox" style="background: #111420; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 10px; display: none;">
+          <!-- 득표 순위 렌더링 -->
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-vote" style="flex: 1;" onclick="closeAndTallyDayVote()">📢 투표 마감 및 결과 발표</button>
+          <button class="btn btn-secondary" style="flex: 1; margin: 0;" onclick="resetDayVote()">🔄 투표 다시하기</button>
+        </div>
+      </div>
+
+      <!-- 역할 배정 설정 (수동 & 랜덤 & 직업 선택) -->
+      <div class="card">
+        <div class="card-title">🎭 역할 배정 및 특수직업 선택</div>
 
         <div class="tabs">
           <button class="tab-btn active" id="tabManual" onclick="switchAssignTab('manual')">🎯 관리자 직접 지정</button>
@@ -442,43 +493,46 @@
           <button class="btn btn-primary" style="margin-top: 12px;" onclick="saveManualRoles()">🎯 설정한 역할로 배정 & 게임 시작</button>
         </div>
 
-        <!-- 탭 2: 랜덤 배정 -->
+        <!-- 탭 2: 랜덤 배정 (특수직업 ON/OFF 포함) -->
         <div id="assignRandomBox" style="display: none;">
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-            참가자 전원에게 역할을 무작위로 자동 섞어서 배정합니다.
-          </p>
-          <div style="margin-bottom: 12px;">
+          <div style="margin-bottom: 10px;">
             <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">마피아 인원 수</label>
             <select id="selectMafiaCount">
-              <option value="2">마피아 2명 (15명 이하 추천)</option>
-              <option value="3" selected>마피아 3명 (15~20명 야유회 추천)</option>
-              <option value="4">마피아 4명 (20명 초과 시)</option>
+              <option value="2">마피아 2명</option>
+              <option value="3" selected>마피아 3명 (15~20명 추천)</option>
+              <option value="4">마피아 4명</option>
             </select>
           </div>
-          <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 14px;">
-            * 의사 1명, 경찰 1명은 자동으로 포함되며 나머지는 전원 시민이 됩니다.
+
+          <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">포함할 특수 직업 선택</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="checkIncludeDoctor" checked> 💉 의사 (1명)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="checkIncludePolice" checked> 🔍 경찰 (1명)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="checkIncludeSoldier" checked> 🛡️ 군인 (1명)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="checkIncludeMedium" checked> 👻 영매 (1명)
+            </label>
           </div>
+          <p style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 12px;">
+            * 체크된 직업들이 1명씩 배정되며, 남은 참가자는 전원 선량한 시민이 됩니다.
+          </p>
           <button class="btn btn-primary" onclick="startRandomGame()">🎲 랜덤 배정하고 게임 시작</button>
         </div>
       </div>
 
-      <!-- 낮 오프라인 투표 처형 기능 -->
-      <div class="card">
-        <div class="card-title">⚖️ 낮 오프라인 투표 처형 처리</div>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
-          오프라인 거수/토론 투표로 처형이 결정된 사람을 선택해 사망 처리하세요.
-        </p>
-        <select id="selectExecutePlayer"></select>
-        <button class="btn btn-danger" onclick="executeSelectedPlayer()">선택한 사람 처형하기</button>
-      </div>
-
-      <!-- 관리자 전용 전체 플레이어 비밀 현황표 -->
+      <!-- 관리자 전용 전체 플레이어 정체 현황표 -->
       <div class="card">
         <div class="card-title">🕵️ 전체 플레이어 정체 현황판 (관리자 전용)</div>
         <div id="adminSecretTable"></div>
       </div>
 
-      <!-- 게임 리셋 -->
+      <!-- 리셋 -->
       <div class="card">
         <button class="btn btn-secondary" style="border: 1px solid #dc2626; color: #f87171;" onclick="resetEntireGame()">🔄 전체 게임 초기화 (대기실로)</button>
       </div>
@@ -487,9 +541,7 @@
 
   <script>
     /* =====================================================================
-       [1] FIREBASE 설정 키 (야유회 당일 클라우드 연동용)
-       구글 Firebase 콘솔에서 발급받은 키를 아래 객체에 그대로 붙여넣으시면 됩니다.
-       키가 비어있을 때는 데모 모드(단일 브라우저 로컬 스토리지)로 자동 테스트됩니다.
+       [1] FIREBASE 설정 키 (사용자 실제 발급 키 적용 완료)
        ===================================================================== */
     const firebaseConfig = {
       apiKey: "AIzaSyBqhaXqnwFLdjcXeeX5ALF_vgjeAjpoSoY",
@@ -501,7 +553,6 @@
       appId: "1:421895273699:web:e57ac84417b459937819d6"
     };
 
-    // Firebase 연동 상태
     let isFirebaseReady = false;
     let db = null;
 
@@ -515,32 +566,30 @@
       }
     }
 
-    if (!isFirebaseReady) {
-      document.getElementById('firebaseConfigNotice').style.display = 'block';
-    }
-
     /* =====================================================================
-       [2] 게임 데이터 구조 및 상태 변수
+       [2] 게임 데이터 구조
        ===================================================================== */
     let myPlayerId = localStorage.getItem('mafia_my_player_id') || null;
     let myPlayerName = localStorage.getItem('mafia_my_name') || null;
     let isAdmin = false;
 
-    // 게임 상태 객체
     let gameState = {
       phase: 'lobby', // 'lobby' | 'day' | 'night'
       dayCount: 1,
-      players: {}, // { playerId: { id, name, role, isAlive: true } }
+      players: {}, // { id: { id, name, role, isAlive, soldierArmor } }
       nightActions: {
-        mafiaTargets: {},  // { mafiaPlayerId: targetPlayerId }
-        doctorTarget: null, // targetPlayerId
-        policeTarget: null  // targetPlayerId
+        mafiaTargets: {},  // { mafiaId: targetId }
+        doctorTarget: null,
+        policeTarget: null,
+        mediumTarget: null
       },
-      lastNightResult: null // { killed: targetId, saved: boolean }
+      dayVotes: {}, // { voterId: targetId }
+      dayVoteResult: null, // { topTargetId, isTie, tallies }
+      lastNightResult: null
     };
 
     /* =====================================================================
-       [3] 실시간 데이터 동기화 함수 (Firebase vs 로컬)
+       [3] 실시간 클라우드 동기화
        ===================================================================== */
     function syncGameStateToCloud() {
       if (isFirebaseReady && db) {
@@ -552,7 +601,6 @@
       }
     }
 
-    // 데이터 수신 리스너
     if (isFirebaseReady && db) {
       db.ref('mafiaGame').on('value', (snapshot) => {
         const val = snapshot.val();
@@ -560,11 +608,11 @@
           gameState = val;
           if (!gameState.players) gameState.players = {};
           if (!gameState.nightActions) gameState.nightActions = {};
+          if (!gameState.dayVotes) gameState.dayVotes = {};
           renderUI();
         }
       });
     } else {
-      // 로컬 스토리지 모니터링 (창 여러 개 띄워 테스트할 때 실시간 연동)
       window.addEventListener('storage', () => {
         const saved = localStorage.getItem('mafia_local_game_state');
         if (saved) {
@@ -572,7 +620,6 @@
           renderUI();
         }
       });
-      // 초기 로컬 데이터 로드
       const saved = localStorage.getItem('mafia_local_game_state');
       if (saved) {
         try { gameState = JSON.parse(saved); } catch(e){}
@@ -580,7 +627,7 @@
     }
 
     /* =====================================================================
-       [4] 로그인 및 모드 전환
+       [4] 로그인 및 모드
        ===================================================================== */
     function joinAsPlayer() {
       const nameInput = document.getElementById('inputPlayerName').value.trim();
@@ -597,14 +644,13 @@
       localStorage.setItem('mafia_my_name', myPlayerName);
 
       if (!gameState.players) gameState.players = {};
-      
-      // 이미 같은 ID가 있다면 이름 업데이트, 없으면 신규 등록
       if (!gameState.players[myPlayerId]) {
         gameState.players[myPlayerId] = {
           id: myPlayerId,
           name: myPlayerName,
           role: 'citizen',
-          isAlive: true
+          isAlive: true,
+          soldierArmor: true
         };
       } else {
         gameState.players[myPlayerId].name = myPlayerName;
@@ -616,7 +662,7 @@
 
     function loginAsAdmin() {
       const pw = document.getElementById('inputAdminPassword').value.trim();
-      if (pw === 'admin1234' || pw === '') { // 간편 테스트용
+      if (pw === 'admin1234' || pw === '') {
         isAdmin = true;
         showScreen('screenAdmin');
         renderUI();
@@ -630,13 +676,12 @@
       document.getElementById(screenId).classList.add('active');
     }
 
-    // 자동 복귀 체크
     if (myPlayerId && gameState.players && gameState.players[myPlayerId]) {
       showScreen('screenPlayer');
     }
 
     /* =====================================================================
-       [5] 관리자: 역할 배정 로직 (수동 지정 & 랜덤 배정)
+       [5] 관리자: 역할 배정 로직 (직접 지정 vs 랜덤 배정 + 특수직업)
        ===================================================================== */
     function switchAssignTab(tab) {
       document.getElementById('tabManual').classList.toggle('active', tab === 'manual');
@@ -645,17 +690,15 @@
       document.getElementById('assignRandomBox').style.display = tab === 'random' ? 'block' : 'none';
     }
 
-    // [수동 지정] 저장 및 게임 시작
+    // [수동 지정]
     function saveManualRoles() {
       const playerIds = Object.keys(gameState.players || {});
       if (playerIds.length < 4) {
-        alert("참가자가 최소 4명 이상이어야 게임을 시작할 수 있습니다. (현재 " + playerIds.length + "명)");
+        alert("참가자가 최소 4명 이상이어야 합니다. (현재 " + playerIds.length + "명)");
         return;
       }
 
-      let mafiaCount = 0;
-      let doctorCount = 0;
-      let policeCount = 0;
+      let counts = { mafia: 0, doctor: 0, police: 0, soldier: 0, medium: 0, citizen: 0 };
 
       playerIds.forEach(pid => {
         const select = document.getElementById('role_select_' + pid);
@@ -663,113 +706,133 @@
           const role = select.value;
           gameState.players[pid].role = role;
           gameState.players[pid].isAlive = true;
-
-          if (role === 'mafia') mafiaCount++;
-          if (role === 'doctor') doctorCount++;
-          if (role === 'police') policeCount++;
+          gameState.players[pid].soldierArmor = (role === 'soldier');
+          counts[role] = (counts[role] || 0) + 1;
         }
       });
 
-      if (mafiaCount === 0) {
+      if (counts.mafia === 0) {
         alert("마피아를 최소 1명 이상 지정해 주세요!");
         return;
       }
 
-      gameState.phase = 'day'; // 낮 토론으로 시작
+      gameState.phase = 'day';
       gameState.dayCount = 1;
-      gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null };
+      gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null, mediumTarget: null };
+      gameState.dayVotes = {};
+      gameState.dayVoteResult = null;
       gameState.lastNightResult = null;
 
       syncGameStateToCloud();
-      alert(`역할 배정 완료! 게임이 시작되었습니다.\n(마피아: ${mafiaCount}명, 의사: ${doctorCount}명, 경찰: ${policeCount}명)`);
+      alert(`직접 역할 배정 완료!\n마피아: ${counts.mafia}명, 의사: ${counts.doctor}명, 경찰: ${counts.police}명, 군인: ${counts.soldier}명, 영매: ${counts.medium}명, 시민: ${counts.citizen}명`);
     }
 
-    // [랜덤 배정] 시작
+    // [랜덤 배정]
     function startRandomGame() {
       const playerIds = Object.keys(gameState.players || {});
       const total = playerIds.length;
       const targetMafia = parseInt(document.getElementById('selectMafiaCount').value);
 
-      if (total < targetMafia + 2) {
-        alert(`참가자 인원(${total}명)이 너무 적습니다. 마피아 수(${targetMafia}명) + 의사(1) + 경찰(1) 이상이어야 합니다.`);
+      const incDoctor = document.getElementById('checkIncludeDoctor').checked;
+      const incPolice = document.getElementById('checkIncludePolice').checked;
+      const incSoldier = document.getElementById('checkIncludeSoldier').checked;
+      const incMedium = document.getElementById('checkIncludeMedium').checked;
+
+      const specialRoles = [];
+      if (incDoctor) specialRoles.push('doctor');
+      if (incPolice) specialRoles.push('police');
+      if (incSoldier) specialRoles.push('soldier');
+      if (incMedium) specialRoles.push('medium');
+
+      const requiredMin = targetMafia + specialRoles.length;
+      if (total < requiredMin) {
+        alert(`참가 인원(${total}명)이 선택한 역할 수(마피아 ${targetMafia}명 + 특수직업 ${specialRoles.length}명 = 총 ${requiredMin}명)보다 적습니다.`);
         return;
       }
 
-      // 셔플 알고리즘
       const shuffled = [...playerIds].sort(() => Math.random() - 0.5);
 
       // 전체 초기화
       playerIds.forEach(pid => {
         gameState.players[pid].role = 'citizen';
         gameState.players[pid].isAlive = true;
+        gameState.players[pid].soldierArmor = false;
       });
 
       // 마피아 배정
+      let idx = 0;
       for (let i = 0; i < targetMafia; i++) {
-        gameState.players[shuffled[i]].role = 'mafia';
+        gameState.players[shuffled[idx++]].role = 'mafia';
       }
-      // 의사 배정
-      gameState.players[shuffled[targetMafia]].role = 'doctor';
-      // 경찰 배정
-      gameState.players[shuffled[targetMafia + 1]].role = 'police';
-      // 나머지는 자동으로 citizen
+
+      // 특수직업 배정
+      specialRoles.forEach(role => {
+        const p = gameState.players[shuffled[idx++]];
+        p.role = role;
+        if (role === 'soldier') p.soldierArmor = true;
+      });
 
       gameState.phase = 'day';
       gameState.dayCount = 1;
-      gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null };
+      gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null, mediumTarget: null };
+      gameState.dayVotes = {};
+      gameState.dayVoteResult = null;
       gameState.lastNightResult = null;
 
       syncGameStateToCloud();
-      alert(`랜덤 역할 배정 완료! 게임이 시작되었습니다.\n(마피아: ${targetMafia}명, 의사: 1명, 경찰: 1명, 시민: ${total - targetMafia - 2}명)`);
+      alert(`랜덤 배정 완료! 게임을 시작합니다.\n(마피아: ${targetMafia}명, 특수직업: ${specialRoles.length}명, 시민: ${total - idx}명)`);
     }
 
     /* =====================================================================
-       [6] 관리자: 페이즈 전환 및 밤 결과 자동 집계
+       [6] 페이즈 제어 및 밤 결과 계산 (군인 방어 & 의사 자기치료 불가 반영)
        ===================================================================== */
     function setGamePhase(phase) {
       gameState.phase = phase;
       if (phase === 'night') {
-        // 밤이 되면 이전 액션 초기화
-        gameState.nightActions = {
-          mafiaTargets: {},
-          doctorTarget: null,
-          policeTarget: null
-        };
+        gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null, mediumTarget: null };
+        gameState.dayVotes = {};
+        gameState.dayVoteResult = null;
       } else if (phase === 'day') {
-        // 낮이 되면 밤 결과 계산
         calculateNightResult();
+        gameState.dayVotes = {};
+        gameState.dayVoteResult = null;
       }
       syncGameStateToCloud();
     }
 
     function calculateNightResult() {
       const actions = gameState.nightActions || {};
-      
-      // 마피아 투표 중 가장 많이 지목된 타겟 산출
       const votes = {};
-      Object.values(actions.mafiaTargets || {}).forEach(targetId => {
-        votes[targetId] = (votes[targetId] || 0) + 1;
+      Object.values(actions.mafiaTargets || {}).forEach(tid => {
+        votes[tid] = (votes[tid] || 0) + 1;
       });
 
       let mafiaTarget = null;
       let maxVote = 0;
-      for (const [targetId, count] of Object.entries(votes)) {
+      for (const [tid, count] of Object.entries(votes)) {
         if (count > maxVote) {
           maxVote = count;
-          mafiaTarget = targetId;
+          mafiaTarget = tid;
         }
       }
 
       const doctorTarget = actions.doctorTarget || null;
-
       let killedPlayerId = null;
-      let isSaved = false;
+      let isSavedByDoctor = false;
+      let isSavedBySoldier = false;
 
       if (mafiaTarget) {
         if (mafiaTarget === doctorTarget) {
-          isSaved = true; // 의사가 살림
+          isSavedByDoctor = true; // 의사 치료 성공
         } else {
-          killedPlayerId = mafiaTarget; // 암살 성공
+          // 군인 1회 방어 체크
+          const targetPlayer = gameState.players[mafiaTarget];
+          if (targetPlayer && targetPlayer.role === 'soldier' && targetPlayer.soldierArmor) {
+            isSavedBySoldier = true;
+            targetPlayer.soldierArmor = false; // 방패 소진
+          } else {
+            killedPlayerId = mafiaTarget; // 암살 성공
+          }
         }
       }
 
@@ -777,90 +840,163 @@
         mafiaTarget: mafiaTarget,
         doctorTarget: doctorTarget,
         killedPlayerId: killedPlayerId,
-        isSaved: isSaved
+        isSavedByDoctor: isSavedByDoctor,
+        isSavedBySoldier: isSavedBySoldier
       };
     }
 
     function applyNightDeath() {
       if (!gameState.lastNightResult) {
-        alert("아직 밤 결과가 집계되지 않았습니다.");
+        alert("아직 밤 결과가 계산되지 않았습니다.");
         return;
       }
 
-      const { killedPlayerId, isSaved } = gameState.lastNightResult;
-      if (killedPlayerId && !isSaved) {
-        if (gameState.players[killedPlayerId]) {
-          gameState.players[killedPlayerId].isAlive = false;
+      const { killedPlayerId, isSavedByDoctor, isSavedBySoldier } = gameState.lastNightResult;
+      if (killedPlayerId) {
+        const victim = gameState.players[killedPlayerId];
+        if (victim) {
+          victim.isAlive = false;
           syncGameStateToCloud();
-          alert(`[${gameState.players[killedPlayerId].name}] 님이 사망 처리되었습니다.`);
+          alert(`[${victim.name}] 님이 사망 처리되었습니다.`);
         }
+      } else if (isSavedByDoctor) {
+        alert("🛡️ 의사의 치료 성공으로 지난밤 사망자가 없습니다!");
+      } else if (isSavedBySoldier) {
+        alert("🛡️ 군인이 마피아의 습격을 1회 방어해 내어 사망자가 없습니다!");
       } else {
-        alert("지난밤 의사의 치료 성공 또는 암살 실패로 사망자가 없습니다!");
+        alert("지난밤 사망자가 없습니다.");
       }
     }
 
-    function executeSelectedPlayer() {
-      const select = document.getElementById('selectExecutePlayer');
-      const targetId = select.value;
-      if (!targetId) {
-        alert("처형할 대상을 선택해 주세요.");
-        return;
+    /* =====================================================================
+       [7] 낮 스마트폰 익명 투표 로직
+       ===================================================================== */
+    function submitDayVote(targetId) {
+      if (!myPlayerId || !gameState.players[myPlayerId] || !gameState.players[myPlayerId].isAlive) return;
+
+      if (!gameState.dayVotes) gameState.dayVotes = {};
+      gameState.dayVotes[myPlayerId] = targetId;
+
+      syncGameStateToCloud();
+      alert(`[${gameState.players[targetId].name}] 님에게 익명 투표를 완료했습니다.`);
+    }
+
+    function closeAndTallyDayVote() {
+      const votes = gameState.dayVotes || {};
+      const tallies = {};
+
+      Object.values(votes).forEach(tid => {
+        tallies[tid] = (tallies[tid] || 0) + 1;
+      });
+
+      // 최다 득표자 찾기
+      let maxVotes = 0;
+      let topCandidates = [];
+
+      for (const [tid, count] of Object.entries(tallies)) {
+        if (count > maxVotes) {
+          maxVotes = count;
+          topCandidates = [tid];
+        } else if (count === maxVotes) {
+          topCandidates.push(tid);
+        }
       }
-      if (confirm(`정말 [${gameState.players[targetId].name}] 님을 처형(사망) 처리하시겠습니까?`)) {
-        gameState.players[targetId].isAlive = false;
+
+      const isTie = topCandidates.length > 1;
+      const topTargetId = (!isTie && topCandidates.length === 1) ? topCandidates[0] : null;
+
+      gameState.dayVoteResult = {
+        tallies: tallies,
+        maxVotes: maxVotes,
+        isTie: isTie,
+        topTargetId: topTargetId
+      };
+
+      // 자동 처형 안내
+      if (topTargetId) {
+        const target = gameState.players[topTargetId];
+        if (confirm(`투표 마감 결과:\n[${target.name}] 님이 ${maxVotes}표로 최다 득표했습니다.\n\n이 참가자를 처형(사망) 처리하시겠습니까?`)) {
+          target.isAlive = false;
+          alert(`[${target.name}] 님이 처형되었습니다.`);
+        }
+      } else if (isTie) {
+        alert(`동점표 발생! (${maxVotes}표 동점)\n동점으로 인해 오늘은 아무도 처형되지 않습니다.`);
+      } else {
+        alert("투표 참여자가 없습니다.");
+      }
+
+      syncGameStateToCloud();
+    }
+
+    function resetDayVote() {
+      if (confirm("낮 투표를 초기화하고 재투표를 진행하시겠습니까?")) {
+        gameState.dayVotes = {};
+        gameState.dayVoteResult = null;
         syncGameStateToCloud();
-        alert(`[${gameState.players[targetId].name}] 님이 처형되었습니다.`);
       }
     }
 
     function resetEntireGame() {
-      if (confirm("게임을 초기화하고 대기실로 돌아가시겠습니까?")) {
+      if (confirm("전체 게임을 초기화하고 대기실로 돌아가시겠습니까?")) {
         gameState.phase = 'lobby';
         gameState.nightActions = {};
+        gameState.dayVotes = {};
+        gameState.dayVoteResult = null;
         gameState.lastNightResult = null;
         Object.keys(gameState.players || {}).forEach(pid => {
           gameState.players[pid].role = 'citizen';
           gameState.players[pid].isAlive = true;
+          gameState.players[pid].soldierArmor = true;
         });
         syncGameStateToCloud();
       }
     }
 
     /* =====================================================================
-       [7] 플레이어: 밤 액션 수행 (마피아 암살 / 의사 치료 / 경찰 조사)
+       [8] 플레이어 밤 액션 (마피아 실시간 공유, 의사 자기치료 불가, 영매 접신)
        ===================================================================== */
     function submitPlayerNightAction(targetId) {
       if (!myPlayerId || !gameState.players[myPlayerId]) return;
-      const myRole = gameState.players[myPlayerId].role;
+      const me = gameState.players[myPlayerId];
+      if (!me.isAlive) return;
 
       if (!gameState.nightActions) {
-        gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null };
+        gameState.nightActions = { mafiaTargets: {}, doctorTarget: null, policeTarget: null, mediumTarget: null };
       }
 
-      if (myRole === 'mafia') {
+      if (me.role === 'mafia') {
         if (!gameState.nightActions.mafiaTargets) gameState.nightActions.mafiaTargets = {};
         gameState.nightActions.mafiaTargets[myPlayerId] = targetId;
-        alert(`[${gameState.players[targetId].name}] 님을 암살 대상으로 선택했습니다.`);
-      } else if (myRole === 'doctor') {
+      } else if (me.role === 'doctor') {
+        if (targetId === myPlayerId) {
+          alert("⚠️ 의사는 자기 자신을 치료할 수 없습니다!");
+          return;
+        }
         gameState.nightActions.doctorTarget = targetId;
         alert(`[${gameState.players[targetId].name}] 님을 오늘 밤 치료합니다.`);
-      } else if (myRole === 'police') {
+      } else if (me.role === 'police') {
         gameState.nightActions.policeTarget = targetId;
         const target = gameState.players[targetId];
-        const isTargetMafia = target && target.role === 'mafia';
-        
-        // 경찰에게 즉시 조사 결과 알림!
-        if (isTargetMafia) {
+        const isMafia = target && target.role === 'mafia';
+        if (isMafia) {
           alert(`🚨 [경찰 조사 결과]\n\n"${target.name}" 님은 [ 마피아 🔴 ] 가 맞습니다!`);
         } else {
-          alert(`🕊️ [경찰 조사 결과]\n\n"${target.name}" 님은 [ 선량한 시민 🟢 ] 입니다.`);
+          alert(`🕊️ [경찰 조사 결과]\n\n"${target.name}" 님은 [ 선량한 시민/특수직 🟢 ] 입니다.`);
+        }
+      } else if (me.role === 'medium') {
+        gameState.nightActions.mediumTarget = targetId;
+        const target = gameState.players[targetId];
+        const isMafia = target && target.role === 'mafia';
+        if (isMafia) {
+          alert(`👻 [영매 접신 결과]\n\n사망한 "${target.name}" 님의 영혼:\n"나는 살아생전 [ 마피아 🔴 ] 였다..."`);
+        } else {
+          alert(`👻 [영매 접신 결과]\n\n사망한 "${target.name}" 님의 영혼:\n"나는 억울하게 죽은 [ 시민팀 🟢 ] 이었소..."`);
         }
       }
 
       syncGameStateToCloud();
     }
 
-    // 직업 확인 터치 인터랙션
     function revealRole(show) {
       document.getElementById('roleHiddenText').style.display = show ? 'none' : 'block';
       document.getElementById('roleVisibleText').style.display = show ? 'block' : 'none';
@@ -868,135 +1004,248 @@
     }
 
     /* =====================================================================
-       [8] UI 렌더링 함수
+       [9] UI 렌더링
        ===================================================================== */
     function renderUI() {
       const players = gameState.players || {};
       const playerList = Object.values(players);
       const alivePlayers = playerList.filter(p => p.isAlive);
+      const deadPlayers = playerList.filter(p => !p.isAlive);
 
-      // 1. 공통 헤더/상태
-      const statusText = gameState.phase === 'lobby' ? '대기실 모집 중' : (gameState.phase === 'day' ? '☀️ 낮 시간 토론 중' : '🌙 밤 시간 활동 중');
+      // 상단 헤더
+      const statusText = gameState.phase === 'lobby' ? '대기실 모집 중' : (gameState.phase === 'day' ? '☀️ 낮 시간' : '🌙 밤 시간');
       document.getElementById('subHeaderStatus').textContent = `${statusText} (${alivePlayers.length}/${playerList.length}명 생존)`;
 
-      // 2. 플레이어 화면 렌더링
+      // 1. 플레이어 화면
       if (myPlayerId && players[myPlayerId]) {
         const me = players[myPlayerId];
-        
-        // 대기실 vs 인게임 분기
+
         if (gameState.phase === 'lobby') {
           document.getElementById('playerRoleCard').style.display = 'none';
           document.getElementById('playerPhaseBanner').style.display = 'none';
           document.getElementById('playerNightActionCard').style.display = 'none';
+          document.getElementById('playerDayVoteCard').style.display = 'none';
           document.getElementById('playerWaitingCard').style.display = 'block';
           document.getElementById('waitingTitle').textContent = `대기실 입장 완료 (${me.name}님)`;
-          document.getElementById('waitingDesc').textContent = '사회자가 게임을 시작하면 내 직업 카드가 여기에 표시됩니다.';
+          document.getElementById('waitingDesc').textContent = '사회자가 직업을 배정하고 게임을 시작하면 내 직업 카드가 표시됩니다.';
         } else {
-          // 인게임
           document.getElementById('playerRoleCard').style.display = 'block';
           document.getElementById('playerPhaseBanner').style.display = 'block';
-          
-          if (gameState.phase === 'day') {
-            document.getElementById('playerPhaseBanner').className = 'phase-banner phase-day';
-            document.getElementById('playerPhaseBanner').textContent = '☀️ 낮 시간 (오프라인 토론 & 투표)';
-            document.getElementById('playerNightActionCard').style.display = 'none';
-            document.getElementById('playerWaitingCard').style.display = 'none';
-          } else {
-            document.getElementById('playerPhaseBanner').className = 'phase-banner phase-night';
-            document.getElementById('playerPhaseBanner').textContent = '🌙 밤 시간 (마피아/의사/경찰 행동 중)';
-          }
 
-          // 내 역할 텍스트 및 스타일 세팅
+          // 직업 뱃지 세팅
           const roleBadge = document.getElementById('myRoleBadge');
           const roleName = document.getElementById('myRoleName');
           const roleDesc = document.getElementById('myRoleDesc');
-          const comradesBox = document.getElementById('myMafiaComrades');
+          const roleExtra = document.getElementById('myRoleExtra');
+
+          roleExtra.style.display = 'none';
 
           if (me.role === 'mafia') {
             roleBadge.className = 'badge badge-mafia';
             roleBadge.textContent = '마피아';
             roleName.textContent = '마피아 🔪';
             roleName.style.color = 'var(--mafia-red)';
-            roleDesc.textContent = '밤마다 동료들과 함께 시민 1명을 암살합니다.';
+            roleDesc.textContent = '밤마다 동료들과 상의하여 시민 1명을 암살합니다.';
 
-            // 동료 마피아 명단 표시
             const comrades = playerList.filter(p => p.role === 'mafia' && p.id !== me.id).map(p => p.name);
             if (comrades.length > 0) {
-              comradesBox.style.display = 'block';
-              comradesBox.textContent = `🤝 동료 마피아: ${comrades.join(', ')}`;
-            } else {
-              comradesBox.style.display = 'none';
+              roleExtra.style.display = 'block';
+              roleExtra.style.color = 'var(--gold)';
+              roleExtra.textContent = `🤝 동료 마피아: ${comrades.join(', ')}`;
             }
           } else if (me.role === 'doctor') {
             roleBadge.className = 'badge badge-doctor';
             roleBadge.textContent = '의사';
             roleName.textContent = '의사 💉';
             roleName.style.color = 'var(--doctor-green)';
-            roleDesc.textContent = '밤마다 마피아에게 살해당할 것 같은 1명을 치료합니다.';
-            comradesBox.style.display = 'none';
+            roleDesc.textContent = '밤마다 1명을 치료합니다. (⚠️ 자기 자신 치료 불가)';
           } else if (me.role === 'police') {
             roleBadge.className = 'badge badge-police';
             roleBadge.textContent = '경찰';
             roleName.textContent = '경찰 🔍';
             roleName.style.color = 'var(--police-blue)';
-            roleDesc.textContent = '밤마다 1명을 조사하여 마피아 여부를 확인합니다.';
-            comradesBox.style.display = 'none';
+            roleDesc.textContent = '밤마다 1명의 정체를 조사해 마피아 여부를 확인합니다.';
+          } else if (me.role === 'soldier') {
+            roleBadge.className = 'badge badge-soldier';
+            roleBadge.textContent = '군인';
+            roleName.textContent = '군인 🛡️';
+            roleName.style.color = 'var(--soldier-amber)';
+            roleDesc.textContent = '마피아의 첫 암살 공격을 1회 방어합니다.';
+            roleExtra.style.display = 'block';
+            roleExtra.innerHTML = me.soldierArmor 
+              ? '<span style="color:var(--gold);">방어권: 1회 유효 🛡️</span>' 
+              : '<span style="color:#ef4444;">방어권: 이미 소진됨 ❌</span>';
+          } else if (me.role === 'medium') {
+            roleBadge.className = 'badge badge-medium';
+            roleBadge.textContent = '영매';
+            roleName.textContent = '영매 👻';
+            roleName.style.color = 'var(--medium-purple)';
+            roleDesc.textContent = '밤마다 사망한 사람 1명의 진짜 정체(마피아/시민팀)를 알아냅니다.';
           } else {
             roleBadge.className = 'badge badge-citizen';
             roleBadge.textContent = '시민';
             roleName.textContent = '시민 🕊️';
             roleName.style.color = 'var(--citizen-gray)';
-            roleDesc.textContent = '선량한 시민입니다. 낮에 토론을 통해 마피아를 찾아내세요!';
-            comradesBox.style.display = 'none';
+            roleDesc.textContent = '선량한 시민입니다. 낮에 토론과 스마트폰 익명 투표로 마피아를 찾아내세요!';
           }
 
-          // 생존/사망 표시
           document.getElementById('myLifeStatus').innerHTML = me.isAlive 
             ? '<span style="color: var(--doctor-green);">생존 중 🟢</span>' 
             : '<span style="color: var(--mafia-red);">사망 💀 (관전자 모드)</span>';
 
-          // 밤 액션 UI
-          if (gameState.phase === 'night' && me.isAlive) {
-            if (me.role === 'mafia' || me.role === 'doctor' || me.role === 'police') {
+          // 낮/밤에 따른 카드 표시
+          if (gameState.phase === 'day') {
+            document.getElementById('playerPhaseBanner').className = 'phase-banner phase-day';
+            document.getElementById('playerPhaseBanner').textContent = `☀️ 낮 시간 (토론 & 스마트폰 익명 투표)`;
+            document.getElementById('playerNightActionCard').style.display = 'none';
+            document.getElementById('playerWaitingCard').style.display = 'none';
+
+            // 낮 익명 투표 UI (생존자만)
+            if (me.isAlive) {
+              document.getElementById('playerDayVoteCard').style.display = 'block';
+              const dayTargetList = document.getElementById('dayVoteTargetList');
+              dayTargetList.innerHTML = '';
+
+              const myCurrentVote = gameState.dayVotes?.[myPlayerId];
+
+              alivePlayers.forEach(p => {
+                const isSelected = (myCurrentVote === p.id);
+                const item = document.createElement('div');
+                item.className = 'action-target-item' + (isSelected ? ' selected' : '');
+                item.innerHTML = `
+                  <span style="font-weight:700;">${p.name} ${p.id === me.id ? '<small style="color:var(--primary);">(나)</small>' : ''}</span>
+                  <span style="font-size:0.8rem; color:${isSelected ? 'var(--gold)' : 'var(--text-muted)'};">
+                    ${isSelected ? '내 투표 선택됨 ✓' : '투표하기'}
+                  </span>
+                `;
+                item.onclick = () => submitDayVote(p.id);
+                dayTargetList.appendChild(item);
+              });
+            } else {
+              document.getElementById('playerDayVoteCard').style.display = 'none';
+            }
+
+          } else {
+            // 밤 시간
+            document.getElementById('playerPhaseBanner').className = 'phase-banner phase-night';
+            document.getElementById('playerPhaseBanner').textContent = '🌙 밤 시간 (마피아/특수직업 행동 중)';
+            document.getElementById('playerDayVoteCard').style.display = 'none';
+
+            if (me.isAlive && ['mafia', 'doctor', 'police', 'medium'].includes(me.role)) {
               document.getElementById('playerNightActionCard').style.display = 'block';
               document.getElementById('playerWaitingCard').style.display = 'none';
 
               const titleEl = document.getElementById('nightActionTitle');
               const subEl = document.getElementById('nightActionSub');
               const targetListEl = document.getElementById('nightTargetList');
-              targetListEl.innerHTML = '';
+              const mafiaStatusBox = document.getElementById('mafiaComradesStatusBox');
+              const mafiaDetailsEl = document.getElementById('mafiaComradesVoteDetails');
 
+              targetListEl.innerHTML = '';
+              mafiaStatusBox.style.display = 'none';
+
+              // [1] 마피아 밤 화면 (동료 실시간 지목 현황 공유)
               if (me.role === 'mafia') {
                 titleEl.textContent = '🔪 마피아 암살 지목';
-                subEl.textContent = '오늘 밤 암살할 대상을 선택하세요:';
+                subEl.textContent = '동료 마피아와 실시간으로 타겟을 맞춰 보세요:';
+                mafiaStatusBox.style.display = 'block';
+
+                const mafiaVotes = gameState.nightActions?.mafiaTargets || {};
+                const mafiaPlayers = playerList.filter(p => p.role === 'mafia' && p.isAlive);
+                
+                mafiaDetailsEl.innerHTML = mafiaPlayers.map(mp => {
+                  const targetName = players[mafiaVotes[mp.id]]?.name || '미선택';
+                  return `<div>• <b>${mp.name}</b> ➔ <span style="color:var(--gold);">${targetName}</span></div>`;
+                }).join('');
+
+                alivePlayers.forEach(target => {
+                  const mySelected = (mafiaVotes[me.id] === target.id);
+                  // 이 타겟을 지목한 마피아 명단
+                  const chosenMafias = mafiaPlayers.filter(mp => mafiaVotes[mp.id] === target.id).map(mp => mp.name);
+
+                  const item = document.createElement('div');
+                  item.className = 'action-target-item' + (mySelected ? ' selected' : '');
+                  item.innerHTML = `
+                    <div>
+                      <div style="font-weight:700;">${target.name}</div>
+                      ${chosenMafias.length > 0 ? `<div class="mafia-voter-tags">${chosenMafias.map(m => `<span class="mafia-tag">${m} 지목</span>`).join('')}</div>` : ''}
+                    </div>
+                    <span style="font-size:0.8rem; color:${mySelected ? 'var(--gold)' : 'var(--text-muted)'};">
+                      ${mySelected ? '선택됨 ✓' : '선택'}
+                    </span>
+                  `;
+                  item.onclick = () => submitPlayerNightAction(target.id);
+                  targetListEl.appendChild(item);
+                });
+
+              // [2] 의사 밤 화면 (자기 자신 치료 불가)
               } else if (me.role === 'doctor') {
                 titleEl.textContent = '💉 의사 치료 대상 선택';
-                subEl.textContent = '오늘 밤 살릴 대상을 선택하세요 (본인도 가능):';
+                subEl.textContent = '살릴 사람을 선택하세요 (⚠️ 자기 자신은 치료 불가):';
+
+                alivePlayers.forEach(target => {
+                  const isMe = (target.id === me.id);
+                  const isSelected = (gameState.nightActions?.doctorTarget === target.id);
+
+                  const item = document.createElement('div');
+                  item.className = 'action-target-item' + (isMe ? ' disabled' : (isSelected ? ' selected' : ''));
+                  item.innerHTML = `
+                    <span style="font-weight:700;">${target.name} ${isMe ? '<small style="color:var(--mafia-red); font-weight:normal;">(자기 자신 불가)</small>' : ''}</span>
+                    <span style="font-size:0.8rem; color:${isSelected ? 'var(--gold)' : 'var(--text-muted)'};">
+                      ${isMe ? '선택불가' : (isSelected ? '선택됨 ✓' : '치료')}
+                    </span>
+                  `;
+                  if (!isMe) {
+                    item.onclick = () => submitPlayerNightAction(target.id);
+                  }
+                  targetListEl.appendChild(item);
+                });
+
+              // [3] 경찰 밤 화면
               } else if (me.role === 'police') {
                 titleEl.textContent = '🔍 경찰 수색 조사';
-                subEl.textContent = '정체를 조사할 대상을 선택하세요:';
+                subEl.textContent = '정체를 조사할 사람을 선택하세요:';
+
+                alivePlayers.forEach(target => {
+                  const isSelected = (gameState.nightActions?.policeTarget === target.id);
+                  const item = document.createElement('div');
+                  item.className = 'action-target-item' + (isSelected ? ' selected' : '');
+                  item.innerHTML = `
+                    <span style="font-weight:700;">${target.name}</span>
+                    <span style="font-size:0.8rem; color:${isSelected ? 'var(--gold)' : 'var(--text-muted)'};">
+                      ${isSelected ? '조사완료 ✓' : '조사하기'}
+                    </span>
+                  `;
+                  item.onclick = () => submitPlayerNightAction(target.id);
+                  targetListEl.appendChild(item);
+                });
+
+              // [4] 영매 밤 화면 (사망자 정체 접신)
+              } else if (me.role === 'medium') {
+                titleEl.textContent = '👻 영매 접신 의식';
+                subEl.textContent = '사망한 사람 중 진짜 정체를 밝힐 1명을 선택하세요:';
+
+                if (deadPlayers.length === 0) {
+                  targetListEl.innerHTML = '<div style="color:var(--text-muted); padding:10px; font-size:0.85rem;">아직 사망한 사람이 없어 접신할 수 없습니다.</div>';
+                } else {
+                  deadPlayers.forEach(target => {
+                    const isSelected = (gameState.nightActions?.mediumTarget === target.id);
+                    const item = document.createElement('div');
+                    item.className = 'action-target-item' + (isSelected ? ' selected' : '');
+                    item.innerHTML = `
+                      <span style="font-weight:700;">${target.name} 💀</span>
+                      <span style="font-size:0.8rem; color:${isSelected ? 'var(--gold)' : 'var(--text-muted)'};">
+                        ${isSelected ? '접신완료 ✓' : '영혼 조사'}
+                      </span>
+                    `;
+                    item.onclick = () => submitPlayerNightAction(target.id);
+                    targetListEl.appendChild(item);
+                  });
+                }
               }
 
-              // 타겟 대상 버튼 생성 (생존자만)
-              alivePlayers.forEach(target => {
-                // 마피아는 동료 마피아를 죽이지 않도록 필터링(선택적)
-                const isSelected = (me.role === 'doctor' && gameState.nightActions?.doctorTarget === target.id) ||
-                                  (me.role === 'police' && gameState.nightActions?.policeTarget === target.id) ||
-                                  (me.role === 'mafia' && gameState.nightActions?.mafiaTargets?.[me.id] === target.id);
-
-                const item = document.createElement('div');
-                item.className = 'action-target-item' + (isSelected ? ' selected' : '');
-                item.innerHTML = `
-                  <span style="font-weight: 700;">${target.name}</span>
-                  <span style="font-size: 0.8rem; color: ${isSelected ? 'var(--gold)' : 'var(--text-muted)'};">
-                    ${isSelected ? '선택됨 ✓' : '선택'}
-                  </span>
-                `;
-                item.onclick = () => submitPlayerNightAction(target.id);
-                targetListEl.appendChild(item);
-              });
             } else {
-              // 시민은 밤에 액션 없음
+              // 시민 / 군인(패시브)은 밤 대기
               document.getElementById('playerNightActionCard').style.display = 'none';
               document.getElementById('playerWaitingCard').style.display = 'block';
               document.getElementById('waitingIcon').textContent = '🌙';
@@ -1006,7 +1255,7 @@
           }
         }
 
-        // 참가자 목록 칩 렌더링
+        // 참가자 목록 칩
         document.getElementById('playerTotalCount').textContent = playerList.length;
         const grid = document.getElementById('playerListGrid');
         grid.innerHTML = '';
@@ -1015,73 +1264,92 @@
           chip.className = 'player-chip' + (p.isAlive ? '' : ' dead');
           chip.innerHTML = `
             <span>${p.name} ${p.id === me.id ? '<small style="color:var(--primary);">(나)</small>' : ''}</span>
-            <span style="font-size: 0.75rem;">${p.isAlive ? '🟢' : '💀'}</span>
+            <span style="font-size:0.75rem;">${p.isAlive ? '🟢' : '💀'}</span>
           `;
           grid.appendChild(chip);
         });
       }
 
-      // 3. 관리자(사회자) 화면 렌더링
+      // 2. 관리자(사회자) 화면
       if (isAdmin) {
         document.getElementById('adminPhaseDisplay').textContent = 
           gameState.phase === 'lobby' ? '대기실' : (gameState.phase === 'day' ? '☀️ 낮 시간' : '🌙 밤 시간');
 
-        // 관리자 수동 배정 목록 렌더링
+        // 관리자 수동 배정 목록
         const manualList = document.getElementById('manualAssignList');
-        // 값이 날아가지 않도록 기존 선택값 기억
         const existingRoles = {};
         playerList.forEach(p => {
           const sel = document.getElementById('role_select_' + p.id);
-          if (sel) existingRoles[p.id] = sel.value;
-          else existingRoles[p.id] = p.role || 'citizen';
+          existingRoles[p.id] = sel ? sel.value : (p.role || 'citizen');
         });
 
         manualList.innerHTML = '';
         playerList.forEach(p => {
           const item = document.createElement('div');
-          item.className = 'manual-assign-item';
+          item.style.cssText = 'background:#131620; border:1px solid var(--card-border); border-radius:10px; padding:8px 12px; margin-bottom:6px; display:flex; align-items:center; justify-content:space-between;';
           item.innerHTML = `
-            <span style="font-weight: 700; font-size: 0.9rem;">${p.name}</span>
-            <select id="role_select_${p.id}" style="width: 140px; margin: 0; padding: 6px 10px; font-size: 0.85rem;">
+            <span style="font-weight:700; font-size:0.9rem;">${p.name}</span>
+            <select id="role_select_${p.id}" style="width:130px; margin:0; padding:6px 8px; font-size:0.82rem;">
               <option value="citizen" ${existingRoles[p.id] === 'citizen' ? 'selected' : ''}>🕊️ 시민</option>
               <option value="mafia" ${existingRoles[p.id] === 'mafia' ? 'selected' : ''}>🔪 마피아</option>
               <option value="doctor" ${existingRoles[p.id] === 'doctor' ? 'selected' : ''}>💉 의사</option>
               <option value="police" ${existingRoles[p.id] === 'police' ? 'selected' : ''}>🔍 경찰</option>
+              <option value="soldier" ${existingRoles[p.id] === 'soldier' ? 'selected' : ''}>🛡️ 군인</option>
+              <option value="medium" ${existingRoles[p.id] === 'medium' ? 'selected' : ''}>👻 영매</option>
             </select>
           `;
           manualList.appendChild(item);
         });
 
-        // 처형 셀렉트박스 갱신 (생존자만)
-        const execSelect = document.getElementById('selectExecutePlayer');
-        execSelect.innerHTML = '<option value="">-- 처형 대상자 선택 --</option>';
-        alivePlayers.forEach(p => {
-          const opt = document.createElement('option');
-          opt.value = p.id;
-          opt.textContent = `${p.name} (${p.role})`;
-          execSelect.appendChild(opt);
-        });
-
-        // 밤 액션 실시간 집계 텍스트
+        // 밤 행동 실시간 집계 텍스트
         const actions = gameState.nightActions || {};
         const mafiaVotes = Object.values(actions.mafiaTargets || {}).map(id => players[id]?.name || id);
         document.getElementById('adminMafiaTargetText').textContent = mafiaVotes.length > 0 ? mafiaVotes.join(', ') : '선택 대기 중';
         document.getElementById('adminDoctorTargetText').textContent = players[actions.doctorTarget]?.name || '선택 대기 중';
         document.getElementById('adminPoliceTargetText').textContent = players[actions.policeTarget]?.name ? `${players[actions.policeTarget].name} (조사함)` : '대기 중';
+        document.getElementById('adminMediumTargetText').textContent = players[actions.mediumTarget]?.name ? `${players[actions.mediumTarget].name} (접신함)` : '대기 중';
 
         // 판정 결과
         if (gameState.lastNightResult) {
           const r = gameState.lastNightResult;
-          if (r.killedPlayerId && !r.isSaved) {
-            document.getElementById('adminNightConclusion').textContent = `💥 [${players[r.killedPlayerId]?.name}] 님 암살 성공 (사망)`;
-            document.getElementById('adminNightConclusion').style.color = 'var(--mafia-red)';
-          } else if (r.isSaved) {
-            document.getElementById('adminNightConclusion').textContent = `🛡️ 의사 치료 성공! 사망자 없음`;
-            document.getElementById('adminNightConclusion').style.color = 'var(--doctor-green)';
+          const conclusionEl = document.getElementById('adminNightConclusion');
+          if (r.killedPlayerId) {
+            conclusionEl.textContent = `💥 [${players[r.killedPlayerId]?.name}] 님 암살 성공 (사망)`;
+            conclusionEl.style.color = 'var(--mafia-red)';
+          } else if (r.isSavedByDoctor) {
+            conclusionEl.textContent = `🛡️ 의사 치료 성공! (사망자 없음)`;
+            conclusionEl.style.color = 'var(--doctor-green)';
+          } else if (r.isSavedBySoldier) {
+            conclusionEl.textContent = `🛡️ 군인 1회 방어 발동! (사망자 없음)`;
+            conclusionEl.style.color = 'var(--soldier-amber)';
           } else {
-            document.getElementById('adminNightConclusion').textContent = `평화로운 밤 (사망자 없음)`;
-            document.getElementById('adminNightConclusion').style.color = 'var(--gold)';
+            conclusionEl.textContent = `평화로운 밤 (사망자 없음)`;
+            conclusionEl.style.color = 'var(--gold)';
           }
+        }
+
+        // 낮 익명 투표 관리자 현황
+        const dayVotes = gameState.dayVotes || {};
+        const voteCount = Object.keys(dayVotes).length;
+        document.getElementById('adminDayVoteCountText').textContent = voteCount;
+        document.getElementById('adminAliveCountText').textContent = alivePlayers.length;
+
+        const tallyBox = document.getElementById('adminDayVoteTallyBox');
+        if (gameState.dayVoteResult) {
+          tallyBox.style.display = 'block';
+          const tallies = gameState.dayVoteResult.tallies || {};
+          let html = '<b>📊 낮 투표 최종 결과 집계:</b><br>';
+          for (const [tid, cnt] of Object.entries(tallies)) {
+            html += `• ${players[tid]?.name || tid}: <b>${cnt}표</b><br>`;
+          }
+          if (gameState.dayVoteResult.isTie) {
+            html += `<span style="color:var(--gold); font-weight:700;">⚠️ 동점표로 인해 처형 무효</span>`;
+          } else if (gameState.dayVoteResult.topTargetId) {
+            html += `<span style="color:var(--mafia-red); font-weight:700;">👉 최다 득표: [${players[gameState.dayVoteResult.topTargetId]?.name}]</span>`;
+          }
+          tallyBox.innerHTML = html;
+        } else {
+          tallyBox.style.display = 'none';
         }
 
         // 관리자 전용 전체 플레이어 비밀 현황표
@@ -1095,6 +1363,8 @@
           if (p.role === 'mafia') roleTag = '<span class="badge badge-mafia">마피아</span>';
           else if (p.role === 'doctor') roleTag = '<span class="badge badge-doctor">의사</span>';
           else if (p.role === 'police') roleTag = '<span class="badge badge-police">경찰</span>';
+          else if (p.role === 'soldier') roleTag = `<span class="badge badge-soldier">군인${p.soldierArmor ? '(방패)' : ''}</span>`;
+          else if (p.role === 'medium') roleTag = '<span class="badge badge-medium">영매</span>';
           else roleTag = '<span class="badge badge-citizen">시민</span>';
 
           row.innerHTML = `
@@ -1106,7 +1376,6 @@
       }
     }
 
-    // 초기 렌더링
     renderUI();
   </script>
 </body>
