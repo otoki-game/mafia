@@ -592,10 +592,10 @@
         <div class="card-title">📊 밤 행동 자동 집계 현황</div>
         <div style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 10px; line-height: 1.6;">
           <div>🔪 <b>마피아 지목:</b> <span id="adminMafiaTargetText" style="color: var(--mafia-red); font-weight:700;">대기 중</span></div>
-          <div>💉 <b>의사 치료:</b> <span id="adminDoctorTargetText" style="color: var(--doctor-green); font-weight:700;">대기 중</span></div>
-          <div>🛡️ <b>군인 방어:</b> <span id="adminSoldierTargetText" style="color: var(--soldier-amber); font-weight:700;">대기 중</span></div>
-          <div>🔍 <b>경찰 조사:</b> <span id="adminPoliceTargetText" style="color: var(--police-blue); font-weight:700;">대기 중</span></div>
-          <div>👻 <b>영매 접신:</b> <span id="adminMediumTargetText" style="color: var(--medium-purple); font-weight:700;">대기 중</span></div>
+          <div>💉 <b>의사<span id="adminDoctorNameLabel"></span> 치료:</b> <span id="adminDoctorTargetText" style="color: var(--doctor-green); font-weight:700;">대기 중</span></div>
+          <div>🛡️ <b>군인<span id="adminSoldierNameLabel"></span> 방어:</b> <span id="adminSoldierTargetText" style="color: var(--soldier-amber); font-weight:700;">대기 중</span></div>
+          <div>🔍 <b>경찰<span id="adminPoliceNameLabel"></span> 조사:</b> <span id="adminPoliceTargetText" style="color: var(--police-blue); font-weight:700;">대기 중</span></div>
+          <div>👻 <b>영매<span id="adminMediumNameLabel"></span> 접신:</b> <span id="adminMediumTargetText" style="color: var(--medium-purple); font-weight:700;">대기 중</span></div>
           <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 8px 0;">
           <div>📢 <b>밤 결과 판정:</b> <span id="adminNightConclusion" style="font-weight: 800; color: #b45309;">밤이 끝나면 계산됩니다.</span></div>
         </div>
@@ -2059,6 +2059,29 @@
         const aliveSoldiers = alivePlayers.filter(p => p.role === 'soldier');
         const alivePolices = alivePlayers.filter(p => p.role === 'police');
         const aliveMediums = alivePlayers.filter(p => p.role === 'medium');
+
+        // 각 특수 직업 플레이어 본인 이름 라벨 갱신 (예: 의사(홍길동) 치료: 대상)
+        const doctorPlayer = playerList.find(p => p.role === 'doctor');
+        const soldierPlayer = playerList.find(p => p.role === 'soldier');
+        const policePlayer = playerList.find(p => p.role === 'police');
+        const mediumPlayer = playerList.find(p => p.role === 'medium');
+
+        const getRoleNameLabel = (p) => {
+          if (!p) return '';
+          return p.isAlive ? `(${p.name})` : `(${p.name} 💀)`;
+        };
+
+        const docLabel = document.getElementById('adminDoctorNameLabel');
+        if (docLabel) docLabel.textContent = getRoleNameLabel(doctorPlayer);
+
+        const solLabel = document.getElementById('adminSoldierNameLabel');
+        if (solLabel) solLabel.textContent = getRoleNameLabel(soldierPlayer);
+
+        const polLabel = document.getElementById('adminPoliceNameLabel');
+        if (polLabel) polLabel.textContent = getRoleNameLabel(policePlayer);
+
+        const medLabel = document.getElementById('adminMediumNameLabel');
+        if (medLabel) medLabel.textContent = getRoleNameLabel(mediumPlayer);
 
         // 마피아 상태
         if (aliveMafias.length === 0) {
