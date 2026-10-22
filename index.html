@@ -1206,8 +1206,88 @@
       <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 800;" onclick="closeGameOverModal()">확인 (대기실로 이동)</button>
     </div>
   </div>
+  <!-- ============================================== -->
+  <!-- 💬 게임 자체 전용 웹 팝업 모달 (브라우저 alert 완벽 대체) -->
+  <!-- ============================================== -->
+  <div id="customAlertModal" class="secret-modal" style="z-index: 99999;">
+    <div class="secret-modal-content" style="max-width: 360px; text-align: center; border: 2px solid var(--primary); animation: popIn 0.22s ease-out; box-shadow: 0 15px 35px rgba(0,0,0,0.35);">
+      <div id="customAlertIcon" style="font-size: 2.6rem; margin-bottom: 6px;">🔔</div>
+      <div id="customAlertTitle" style="font-size: 1.15rem; font-weight: 800; color: var(--title-color); margin-bottom: 8px;">알림</div>
+      <div id="customAlertBody" style="font-size: 0.88rem; line-height: 1.55; color: var(--text); background: var(--box-inner-bg); border: 1px solid var(--box-inner-border); border-radius: 10px; padding: 12px; margin-bottom: 14px; text-align: left; max-height: 240px; overflow-y: auto; white-space: pre-line;">
+      </div>
+      <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 800;" onclick="closeCustomAlert()">확인</button>
+    </div>
+  </div>
 
   <script>
+    /* =====================================================================
+       [0] 브라우저 기본 alert() 완벽 대체 (게임 자체 웹 팝업 모달)
+       ===================================================================== */
+    let customAlertCallback = null;
+
+    window.alert = function(msg, callback) {
+      const modal = document.getElementById('customAlertModal');
+      const bodyEl = document.getElementById('customAlertBody');
+      const iconEl = document.getElementById('customAlertIcon');
+      const titleEl = document.getElementById('customAlertTitle');
+
+      if (!modal || !bodyEl) {
+        console.log("ALERT:", msg);
+        if (callback) callback();
+        return;
+      }
+
+      const text = String(msg || '');
+      
+      // 메시지 내용에 따라 적절한 아이콘과 제목 자동 설정
+      if (text.includes('🚨') || text.includes('긴급') || text.includes('경고') || text.includes('⚠️')) {
+        iconEl.textContent = '⚠️';
+        titleEl.textContent = '경고 및 안내';
+        titleEl.style.color = '#dc2626';
+      } else if (text.includes('👑') || text.includes('사회자')) {
+        iconEl.textContent = '👑';
+        titleEl.textContent = '사회자 안내';
+        titleEl.style.color = '#4f46e5';
+      } else if (text.includes('🌙') || text.includes('밤')) {
+        iconEl.textContent = '🌙';
+        titleEl.textContent = '밤 시간 알림';
+        titleEl.style.color = '#6366f1';
+      } else if (text.includes('☀️') || text.includes('낮')) {
+        iconEl.textContent = '☀️';
+        titleEl.textContent = '낮 시간 알림';
+        titleEl.style.color = '#d97706';
+      } else if (text.includes('⚖️') || text.includes('투표') || text.includes('재판')) {
+        iconEl.textContent = '⚖️';
+        titleEl.textContent = '투표 & 재판 안내';
+        titleEl.style.color = '#0284c7';
+      } else if (text.includes('👋') || text.includes('재접속')) {
+        iconEl.textContent = '👋';
+        titleEl.textContent = '재접속 성공';
+        titleEl.style.color = '#059669';
+      } else if (text.includes('🤖') || text.includes('봇')) {
+        iconEl.textContent = '🤖';
+        titleEl.textContent = '가상 봇 시뮬레이터';
+        titleEl.style.color = '#8b5cf6';
+      } else {
+        iconEl.textContent = '🔔';
+        titleEl.textContent = '안내';
+        titleEl.style.color = 'var(--title-color)';
+      }
+
+      bodyEl.textContent = text;
+      customAlertCallback = callback || null;
+      modal.classList.add('active');
+    };
+
+    function closeCustomAlert() {
+      const modal = document.getElementById('customAlertModal');
+      if (modal) modal.classList.remove('active');
+      if (typeof customAlertCallback === 'function') {
+        const cb = customAlertCallback;
+        customAlertCallback = null;
+        cb();
+      }
+    }
     /* =====================================================================
        [1] FIREBASE 설정 키
        ===================================================================== */
