@@ -2858,16 +2858,13 @@
        [8] 페이즈 및 결과 계산
        ===================================================================== */
     function setGamePhase(phase) {
-      if (phase === 'night' && gameState.phase === 'night') {
-        alert("🌙 [안내: 현재는 밤 시간입니다]\n\n이미 밤이 진행 중입니다.\n마피아와 특수직업들의 밤 행동이 모두 끝나면 [☀️ 낮 시작 (밤 집계)] 버튼을 눌러주세요.");
-        return;
-      }
-      if (phase === 'day' && gameState.phase === 'day') {
-        alert("☀️ [안내: 현재는 낮 시간입니다]\n\n이미 낮이 진행 중입니다.\n낮 토론과 스마트폰 투표/재판이 완료되면 [🌙 밤 시작하기] 버튼을 눌러주세요.");
-        return;
-      }
       if (gameState.phase === 'lobby' && phase === 'day') {
         alert("⚠️ [안내: 현재는 대기실입니다]\n\n아직 게임이 시작되지 않았습니다.\n먼저 역할을 배정한 후 [🌙 밤 시작하기]를 눌러 첫날밤을 시작해 주세요.");
+        return;
+      }
+      // 이미 동일한 페이즈라면 불필요한 팝업 없이 화면만 갱신 후 리턴
+      if (phase === gameState.phase) {
+        renderUI();
         return;
       }
 
@@ -2893,24 +2890,14 @@
       } else if (phase === 'day') {
         calculateNightResult();
         gameState.nightAnnounceSeq = (gameState.nightAnnounceSeq || 0) + 1;
-        const r = gameState.lastNightResult;
-        let nightMsg = "☀️ [날이 밝았습니다 - 밤 결과 자동 집계 완료]\n\n";
-        if (r.killedPlayerId) {
-          const victimName = gameState.players[r.killedPlayerId]?.name || '알 수 없음';
-          nightMsg += `💥 지난밤 [${victimName}] 님이 마피아의 공격으로 사망했습니다!\n(👉 시스템에서 자동으로 '사망' 처리되었습니다.)\n\n📢 사회자님은 현장에 사망자를 공식 발표해 주세요!`;
-        } else if (r.isMafiaTie) {
-          nightMsg += `⚔️ 마피아 팀의 의견이 일치하지 않아(동점표 발생) 지난밤 암살에 실패했습니다!\n(지난밤 사망자 없음)\n\n📢 사회자님은 마피아 암살 실패를 공식 발표해 주세요!`;
-        } else if (r.isSavedBySoldier) {
-          nightMsg += `🛡️ 마피아가 대상을 공격하였으나, 군인이 1회 버텼습니다!\n(지난밤 사망자 없음)\n\n📢 사회자님은 군인의 1회 방어 성공을 공식 발표해 주세요!`;
-        } else if (r.isSavedByDoctor) {
-          nightMsg += `💉 마피아가 특정 대상을 공격했지만 [의사]의 치료로 살아났습니다!\n(지난밤 사망자 없음)\n\n📢 사회자님은 의사의 치료 성공을 공식 발표해 주세요!`;
-        } else {
-          nightMsg += `🕊️ 지난밤 아무런 피해 없이 평화로운 밤이 지나갔습니다.\n(사망자 없음)\n\n📢 사회자님은 사망자가 없음을 공식 발표해 주세요!`;
-        }
-        alert(nightMsg);
-        // [승패 체크] 밤 마피아 암살 결과로 생존 마피아 수가 생존 시민 수 이상이 되었는지 자동 판정!
+        // [승패 체크] 밤 마피아 암살 결과로 승패 조건 만족 시 자동 판정!
         checkGameEnd();
       }
+
+      // 1. 로컬 화면 즉시 갱신 (지연 없이 즉각 반응)
+      renderUI();
+
+      // 2. 클라우드 실시간 동기화
       syncGameStateToCloud();
     }
 
@@ -4379,18 +4366,14 @@
           if (nightCard) nightCard.style.display = 'block';
           if (dayTrialCard) dayTrialCard.style.display = 'none';
 
-          // [밤 진행 중] 밤 시작 버튼 비활성화 표시, 낮 시작 버튼 강조
-          if (btnNight) {
-            btnNight.style.opacity = '0.4';
-            btnNight.style.cursor = 'not-allowed';
-            btnNight.style.filter = 'grayscale(40%)';
-            btnNight.innerHTML = '🌙 밤 진행 중 (비활성)';
-          }
+          // [밤 진행 중] 밤 시작 버튼 숨김, 낮 시작 버튼만 크고 선명하게 단독 표시!
+          if (btnNight) btnNight.style.display = 'none';
           if (btnDay) {
+            btnDay.style.display = 'block';
             btnDay.style.opacity = '1';
             btnDay.style.cursor = 'pointer';
             btnDay.style.filter = 'none';
-            btnDay.innerHTML = '☀️ 낮 시작 (밤 집계) ▶';
+            btnDay.innerHTML = '☀️ 낮 시작하기 (밤 결과 집계) ▶';
           }
           if (btnNightToDay) {
             btnNightToDay.style.opacity = '1';
@@ -4405,18 +4388,14 @@
           if (nightCard) nightCard.style.display = 'none';
           if (dayTrialCard) dayTrialCard.style.display = 'block';
 
-          // [낮 진행 중] 낮 시작 버튼 비활성화 표시, 밤 시작 버튼 강조
+          // [낮 진행 중] 낮 시작 버튼 숨김, 밤 시작 버튼만 크고 선명하게 단독 표시!
+          if (btnDay) btnDay.style.display = 'none';
           if (btnNight) {
+            btnNight.style.display = 'block';
             btnNight.style.opacity = '1';
             btnNight.style.cursor = 'pointer';
             btnNight.style.filter = 'none';
             btnNight.innerHTML = '🌙 밤 시작하기 ▶';
-          }
-          if (btnDay) {
-            btnDay.style.opacity = '0.4';
-            btnDay.style.cursor = 'not-allowed';
-            btnDay.style.filter = 'grayscale(40%)';
-            btnDay.innerHTML = '☀️ 낮 진행 중 (비활성)';
           }
           if (btnNightToDay) {
             btnNightToDay.style.opacity = '0.4';
@@ -4432,25 +4411,13 @@
           if (dayTrialCard) dayTrialCard.style.display = 'none';
 
           // [대기실]
+          if (btnDay) btnDay.style.display = 'none';
           if (btnNight) {
+            btnNight.style.display = 'block';
             btnNight.style.opacity = '1';
             btnNight.style.cursor = 'pointer';
             btnNight.style.filter = 'none';
-            btnNight.innerHTML = '🌙 밤 시작하기';
-          }
-          if (btnDay) {
-            btnDay.style.opacity = '0.4';
-            btnDay.style.cursor = 'not-allowed';
-            btnDay.style.filter = 'grayscale(40%)';
-            btnDay.innerHTML = '☀️ 낮 시작 (대기 중)';
-          }
-          if (btnNightToDay) {
-            btnNightToDay.style.opacity = '0.4';
-            btnNightToDay.style.cursor = 'not-allowed';
-          }
-          if (btnDayToNight) {
-            btnDayToNight.style.opacity = '1';
-            btnDayToNight.style.cursor = 'pointer';
+            btnNight.innerHTML = '🌙 밤 시작하기 (첫날밤)';
           }
         }
 
