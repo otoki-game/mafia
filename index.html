@@ -2853,6 +2853,18 @@
       const statusText = gameState.phase === 'lobby' ? '대기실 모집 중' : (gameState.phase === 'day' ? '☀️ 낮 시간' : '🌙 밤 시간');
       document.getElementById('subHeaderStatus').textContent = `${statusText} (${alivePlayers.length}/${playerList.length}명 생존)`;
 
+      // 직업 영문 -> 한글 매핑 헬퍼
+      const roleKrMap = {
+        citizen: '시민',
+        mafia: '마피아',
+        doctor: '의사',
+        police: '경찰',
+        soldier: '군인',
+        medium: '영매',
+        madman: '미치광이',
+        swindler: '사기꾼'
+      };
+
       // 시뮬레이터: 빙의 선택 드롭다운 갱신
       const possessSelect = document.getElementById('selectPossessPlayer');
       if (possessSelect) {
@@ -2860,7 +2872,9 @@
         playerList.forEach(p => {
           const opt = document.createElement('option');
           opt.value = p.id;
-          opt.textContent = `${p.name} (${p.role || '미배정'}, ${p.isAlive ? '생존' : '사망'}) ${p.id === myPlayerId ? '👈(현재)' : ''}`;
+          const roleKr = roleKrMap[p.role] || (p.role || '미배정');
+          const statusKr = p.isAlive ? '생존' : '사망💀';
+          opt.textContent = `${p.name} (${roleKr} / ${statusKr}) ${p.id === myPlayerId ? '👈(현재)' : ''}`;
           if (p.id === myPlayerId) opt.selected = true;
           possessSelect.appendChild(opt);
         });
@@ -2877,7 +2891,9 @@
           playerList.forEach(p => {
             const opt = document.createElement('option');
             opt.value = p.id;
-            opt.textContent = `${p.name} (${p.role || '미배정'}${p.isAlive ? '' : ',💀'})`;
+            const roleKr = roleKrMap[p.role] || (p.role || '미배정');
+            const statusKr = p.isAlive ? '생존' : '사망💀';
+            opt.textContent = `${p.name} (${roleKr} / ${statusKr})`;
             if (p.id === myPlayerId) opt.selected = true;
             quickSelect.appendChild(opt);
           });
