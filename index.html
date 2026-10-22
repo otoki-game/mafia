@@ -913,6 +913,15 @@
         ☀️ 낮 시간
       </div>
 
+      <!-- [NEW] 낮 시간: 전광판 1면 특종 호외 카드 (기자가 보도 터뜨렸을 때 모두에게 항상 표시) -->
+      <div class="card" id="playerBreakingNewsCard"
+        style="display: none; border-radius: 14px; background: #eef2ff; border: 2px solid #6366f1; box-shadow: 0 4px 12px rgba(99,102,241,0.18);">
+        <div style="font-size: 0.88rem; font-weight: 900; color: #4338ca; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+          <span>📰</span> <span id="playerBreakingNewsHeader">[1면 특종 호외] 기자의 단독 보도!</span>
+        </div>
+        <div id="playerBreakingNewsContent" style="font-size: 0.93rem; color: #1e1b4b; line-height: 1.5; font-weight: 700;"></div>
+      </div>
+
       <!-- 낮 시간: 지난밤 비밀 보고서 카드 (경찰/영매 전용 결과 확인) -->
       <div class="card" id="playerNightReportCard"
         style="display: none; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
@@ -1957,14 +1966,15 @@
       }
 
       if (r.breakingNews) {
+        const repName = r.breakingNews.reporterName || '기자';
         bodyEl.innerHTML += `
-          <div style="margin-top:12px; padding:10px 12px; background:#eef2ff; border:1.5px solid #6366f1; border-radius:10px; text-align:left;">
-            <div style="font-size:0.85rem; font-weight:900; color:#4338ca; display:flex; align-items:center; gap:4px; margin-bottom:4px;">
-              <span>📰</span> <span>[속보] 아침 1면 단독 특종 호외 기사!</span>
+          <div style="margin-top:12px; padding:11px 13px; background:#eef2ff; border:2px solid #6366f1; border-radius:12px; text-align:left; box-shadow:0 3px 8px rgba(99,102,241,0.15);">
+            <div style="font-size:0.88rem; font-weight:900; color:#4338ca; display:flex; align-items:center; gap:5px; margin-bottom:5px;">
+              <span>📰</span> <span>[1면 특종 호외] <b>${repName} 기자</b> 단독 보도!</span>
             </div>
-            <div style="font-size:0.88rem; color:#1e1b4b; line-height:1.5;">
-              기자의 밤샘 밀착 취재 결과,<br>
-              <b>[${r.breakingNews.targetName}]</b> 님의 정체는 <b style="color:#4338ca; text-decoration:underline;">'${r.breakingNews.targetRole}'</b>(으)로 밝혀졌습니다!
+            <div style="font-size:0.92rem; color:#1e1b4b; line-height:1.5;">
+              <b>[${repName}] 기자</b>의 밤샘 밀착 취재 결과,<br>
+              <b>[${r.breakingNews.targetName}]</b> 님의 정체는 <b style="color:#4338ca; font-size:1.02rem; text-decoration:underline;">'${r.breakingNews.targetRole}'</b>(으)로 만천하에 밝혀졌습니다!
             </div>
           </div>
         `;
@@ -3041,8 +3051,11 @@
 
       if (actions.reporterTarget) {
         const target = gameState.players[actions.reporterTarget];
+        const realReporter = Object.values(gameState.players || {}).find(p => p.role === 'reporter');
+        const repName = realReporter ? realReporter.name : '기자';
         if (target) {
           breakingNews = {
+            reporterName: repName,
             targetName: target.name,
             targetRole: roleKrMap[target.role] || target.role,
             isFake: false
@@ -3052,10 +3065,13 @@
       } else if (actions.madmanReporterTarget) {
         // [미치광이 가짜 기자의 악마의 오보 찌라시!]
         const target = gameState.players[actions.madmanReporterTarget];
+        const fakeReporter = Object.values(gameState.players || {}).find(p => p.role === 'madman' && p.fakeRole === 'reporter');
+        const repName = fakeReporter ? fakeReporter.name : '기자';
         if (target) {
           // 진짜 마피아면 '선량한 시민', 마피아가 아니면 '마피아 🔪'로 가짜 특종 보도!
           const fakeRoleKr = (target.role === 'mafia') ? '선량한 시민 🕊️' : '마피아 🔪';
           breakingNews = {
+            reporterName: repName,
             targetName: target.name,
             targetRole: fakeRoleKr,
             isFake: true
@@ -3727,6 +3743,23 @@
             document.getElementById('playerNightActionCard').style.display = 'none';
             document.getElementById('playerWaitingCard').style.display = 'none';
 
+            // [NEW] 낮 시간: 전광판 1면 특종 호외 카드 표시 (기자/미치광이기자가 보도 터뜨렸을 때)
+            const newsCard = document.getElementById('playerBreakingNewsCard');
+            if (newsCard) {
+              if (gameState.breakingNews) {
+                newsCard.style.display = 'block';
+                const bNews = gameState.breakingNews;
+                const repName = bNews.reporterName || '기자';
+                document.getElementById('playerBreakingNewsHeader').innerHTML = `[1면 특종 호외] <b>${repName} 기자</b> 단독 보도!`;
+                document.getElementById('playerBreakingNewsContent').innerHTML = `
+                  <b>[${repName}] 기자</b>의 밤샘 밀착 취재 결과,<br>
+                  <b>[${bNews.targetName}]</b> 님의 정체는 <b style="color:#4338ca; text-decoration:underline; font-size:1.02rem;">'${bNews.targetRole}'</b>(으)로 밝혀졌습니다!
+                `;
+              } else {
+                newsCard.style.display = 'none';
+              }
+            }
+
             // [NEW] 낮 시간에 경찰 및 영매 전용 결과 보고서 표시! (미치광이는 조작된 가짜 보고서 표시)
             // 복수 경찰/영매/미치광이 지원: myPlayerId 전용 보고서 및 누적 일지만 독립 표시
             const reportCard = document.getElementById('playerNightReportCard');
@@ -4037,6 +4070,9 @@
             document.getElementById('playerTrialCard').style.display = 'none';
             document.getElementById('playerTrialResultCard').style.display = 'none';
             document.getElementById('playerNightReportCard').style.display = 'none';
+            if (document.getElementById('playerBreakingNewsCard')) {
+              document.getElementById('playerBreakingNewsCard').style.display = 'none';
+            }
             document.getElementById('playerPhaseBanner').className = 'phase-banner phase-night';
             document.getElementById('playerPhaseBanner').textContent = '🌙 밤 시간 (마피아/특수직업 행동 중)';
             document.getElementById('playerDayVoteCard').style.display = 'none';
