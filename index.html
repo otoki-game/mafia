@@ -1096,6 +1096,18 @@
       <!-- 페이즈 제어 -->
       <div class="card">
         <div class="card-title">👑 사회자 컨트롤 패널</div>
+
+        <!-- 🎙️ 사회자 낭독용 대본 가이드 박스 -->
+        <div id="adminHostScriptBox"
+          style="background: #fffbeb; border: 1.5px solid #f59e0b; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);">
+          <div style="font-size: 0.8rem; font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+            <span>🎙️ 사회자 낭독 대본 (이대로 크게 읽으세요!)</span>
+          </div>
+          <div id="adminHostScriptText" style="font-size: 0.92rem; font-weight: 800; color: #78350f; line-height: 1.45;">
+            대본 로딩 중...
+          </div>
+        </div>
+
         <div style="display: flex; gap: 8px; margin-bottom: 10px;">
           <button id="btnAdminNightStart" class="btn btn-night" style="flex: 1;" onclick="setGamePhase('night')">🌙 밤
             시작하기</button>
@@ -1129,6 +1141,12 @@
               style="color: var(--medium-purple); font-weight:700;">대기 중</span></div>
           <div id="adminMadmanRow" style="display: none;">🤪 <b>미치광이<span id="adminMadmanNameLabel"></span>:</b> <span
               id="adminMadmanTargetText" style="color: var(--madman-pink); font-weight:700;">대기 중</span></div>
+          <div id="adminReporterRow" style="display: none;">📰 <b>기자<span id="adminReporterNameLabel"></span> 취재:</b> <span
+              id="adminReporterTargetText" style="color: #4338ca; font-weight:700;">대기 중</span></div>
+          
+          <!-- ⚠️ 밤 행동 미선택자 명단 안내 박스 -->
+          <div id="adminNightUnselectedBox" style="display: none; margin-top: 8px; font-size: 0.82rem; background: #fee2e2; border: 1px solid #fca5a5; padding: 6px 10px; border-radius: 8px; color: #b91c1c;"></div>
+
           <hr style="border: 0; border-top: 1px solid var(--box-inner-border); margin: 8px 0;">
           <div>📢 <b>밤 결과 판정:</b> <span id="adminNightConclusion" style="font-weight: 800; color: #b45309;">밤이 끝나면
               계산됩니다.</span></div>
@@ -1145,10 +1163,14 @@
 
         <!-- 단계 1: 1차 지목 투표 진행 중 -->
         <div id="adminStep1Box">
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">
             1차 지목 투표 참여: <b id="adminDayVoteCountText" style="color: var(--primary);">0</b> / <span
               id="adminAliveCountText">0</span>명 완료
           </div>
+
+          <!-- ⚠️ 낮 1차 미투표자 명단 안내 박스 -->
+          <div id="adminDayUnvotedBox" style="margin-bottom: 10px; font-size: 0.82rem;"></div>
+
           <div style="display: flex; gap: 8px;">
             <button class="btn btn-vote" style="flex: 1.5;" onclick="closeAndTallyDayVote()">📢 1차 투표 마감 & 결과
               발표</button>
@@ -1170,10 +1192,14 @@
           <p style="font-size: 0.8rem; color: #991b1b; margin-bottom: 10px; line-height: 1.4;">
             📢 <b>사회자 멘트:</b> "[<span id="adminDefendantNameMent"></span>] 님, 억울함을 호소할 수 있는 최후 변론 시간을 드립니다!"
           </p>
-          <div style="font-size: 0.82rem; color: #374151; margin-bottom: 8px;">
+          <div style="font-size: 0.82rem; color: #374151; margin-bottom: 6px;">
             찬반 투표 참여 인원: <b id="adminTrialVoteCountText" style="color: #dc2626;">0</b> / <span
               id="adminTrialAliveCountText">0</span>명 완료
           </div>
+
+          <!-- ⚠️ 낮 2차 찬반 미투표자 명단 안내 박스 -->
+          <div id="adminTrialUnvotedBox" style="margin-bottom: 10px; font-size: 0.82rem;"></div>
+
           <div style="display: flex; gap: 8px;">
             <button class="btn btn-danger" style="flex: 1.5;" onclick="closeAndTallyTrialVote()">⚡ 찬반 투표 마감 & 최종 처형
               집행</button>
@@ -1535,13 +1561,19 @@
   <!-- ============================================== -->
   <div id="gameOverModal" class="secret-modal">
     <div class="secret-modal-content" id="gameOverModalContent"
-      style="max-width: 390px; text-align: center; border: 2.5px solid #10b981; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+      style="max-width: 420px; text-align: center; border: 2.5px solid #10b981; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
       <div id="gameOverIcon" style="font-size: 3.2rem; margin-bottom: 6px;">🎉</div>
       <div id="gameOverTitle" style="font-size: 1.3rem; font-weight: 900; color: #10b981; margin-bottom: 8px;">시민 진영 최종
         승리!</div>
       <div id="gameOverReason"
-        style="font-size: 0.92rem; line-height: 1.6; color: var(--text); background: var(--box-inner-bg); border: 1px solid var(--box-inner-border); border-radius: 12px; padding: 14px; margin-bottom: 14px; text-align: left;">
+        style="font-size: 0.92rem; line-height: 1.6; color: var(--text); background: var(--box-inner-bg); border: 1px solid var(--box-inner-border); border-radius: 12px; padding: 14px; margin-bottom: 12px; text-align: left;">
       </div>
+
+      <!-- 📜 명예의 전당 & 전체 직업 공개 컨테이너 -->
+      <div id="gameOverHallOfFame"
+        style="max-height: 260px; overflow-y: auto; text-align: left; margin-bottom: 14px; background: var(--bg); border: 1.5px solid var(--box-inner-border); border-radius: 12px; padding: 10px 12px;">
+      </div>
+
       <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 800;"
         onclick="closeGameOverModal()">확인 (대기실로 이동)</button>
     </div>
@@ -1958,6 +1990,7 @@
       const iconEl = document.getElementById('gameOverIcon');
       const titleEl = document.getElementById('gameOverTitle');
       const reasonEl = document.getElementById('gameOverReason');
+      const hallEl = document.getElementById('gameOverHallOfFame');
 
       if (!modal || !data) return;
 
@@ -1966,6 +1999,57 @@
       titleEl.style.color = data.borderColor || '#10b981';
       if (content) content.style.borderColor = data.borderColor || '#10b981';
       reasonEl.innerHTML = data.reason || '';
+
+      if (hallEl && data.hallOfFame) {
+        const fakeKrMap = { doctor: '의사', police: '경찰', soldier: '군인', medium: '영매', politician: '정치인', reporter: '기자', terrorist: '테러리스트' };
+        const roleKrMap = {
+          mafia: '마피아 🔪',
+          doctor: '의사 💉',
+          police: '경찰 🔍',
+          soldier: '군인 🛡️',
+          medium: '영매 👻',
+          politician: '정치인 🏛️',
+          reporter: '기자 📰',
+          terrorist: '테러리스트 💣',
+          swindler: '사기꾼 🃏',
+          madman: '미치광이 🤡',
+          citizen: '시민 🕊️'
+        };
+
+        const madmen = data.hallOfFame.filter(p => p.role === 'madman');
+        let html = '';
+
+        if (madmen.length > 0) {
+          html += `
+            <div style="background:#fdf2f8; border:1.5px solid #db2777; border-radius:8px; padding:8px 10px; margin-bottom:10px;">
+              <div style="font-weight:800; font-size:0.85rem; color:#db2777; margin-bottom:4px;">🤪 [이 판의 반전 미치광이!]</div>
+          `;
+          madmen.forEach(m => {
+            const fakeName = fakeKrMap[m.fakeRole] || '특수직업';
+            html += `
+              <div style="font-size:0.82rem; color:#9d174d; line-height:1.4;">
+                • <b>${m.name}</b> 님: 자신이 [${fakeName}]인 줄 알고 플레이했으나 실은 <b>미치광이</b>였습니다!
+              </div>
+            `;
+          });
+          html += `</div>`;
+        }
+
+        html += `<div style="font-weight:800; font-size:0.85rem; color:#374151; margin-bottom:6px;">📜 전체 참가자 최종 직업 공개:</div>`;
+        html += `<div style="display:flex; flex-direction:column; gap:4px;">`;
+        data.hallOfFame.forEach(p => {
+          const roleText = roleKrMap[p.role] || p.role;
+          const isAliveText = p.isAlive ? '<span style="color:#16a34a; font-weight:700;">🟢 생존</span>' : '<span style="color:#dc2626; font-weight:700;">💀 사망</span>';
+          html += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 6px; background:#fff; border:1px solid #e2e8f0; border-radius:6px; font-size:0.83rem;">
+              <span><b>${p.name}</b> ${isAliveText}</span>
+              <span style="font-weight:700;">${roleText}</span>
+            </div>
+          `;
+        });
+        html += `</div>`;
+        hallEl.innerHTML = html;
+      }
 
       modal.classList.add('active');
     }
@@ -2045,12 +2129,21 @@
 
       if (winner) {
         const gameOverSeq = Date.now();
+        const hallOfFame = players.map(p => ({
+          id: p.id,
+          name: p.name,
+          role: p.role,
+          fakeRole: p.fakeRole,
+          isAlive: p.isAlive
+        }));
+
         gameState.gameOverData = {
           winner,
           icon,
           title,
           borderColor,
           reason,
+          hallOfFame,
           seq: gameOverSeq
         };
         // 공식 종료 후 대기실(lobby)로 복귀
@@ -4253,6 +4346,27 @@
         document.getElementById('adminPhaseDisplay').textContent =
           gameState.phase === 'lobby' ? '대기실' : (gameState.phase === 'day' ? '☀️ 낮 시간' : '🌙 밤 시간');
 
+        // 🎙️ [사회자 낭독 대본 실시간 업데이트]
+        const hostScriptEl = document.getElementById('adminHostScriptText');
+        if (hostScriptEl) {
+          const currentDayStep = gameState.dayStep || 'voting';
+          if (gameState.phase === 'lobby') {
+            hostScriptEl.innerHTML = '🗣️ <i>"자, 모두 스마트폰으로 접속하셨나요? 인원이 다 모였으면 아래 [새 게임 시작하기]를 눌러주세요!"</i>';
+          } else if (gameState.phase === 'night') {
+            hostScriptEl.innerHTML = '🗣️ <i>"마을에 밤이 찾아왔습니다. 모두 고개를 숙이시고, 각자의 스마트폰을 확인하여 <b>비밀 행동을 완료</b>해 주세요."</i>';
+          } else if (gameState.phase === 'day') {
+            if (currentDayStep === 'voting') {
+              hostScriptEl.innerHTML = '🗣️ <i>"날이 밝았습니다! 모두 고개를 드세요. 지난밤 사건을 확인하시고, <b>의심되는 용의자를 스마트폰으로 투표</b>해 주세요!"</i>';
+            } else if (currentDayStep === 'verdict') {
+              const defP = players[gameState.trialTargetId];
+              const defPName = defP ? defP.name : '피고인';
+              hostScriptEl.innerHTML = `🗣️ <i>"최다 득표자 <b>[${defPName}]</b> 님의 최후 변론 시간입니다! 억울함을 호소하세요. 변론 후 스마트폰으로 <b>찬성/반대 투표</b>를 진행해 주세요!"</i>`;
+            } else if (currentDayStep === 'finished') {
+              hostScriptEl.innerHTML = '🗣️ <i>"재판 결과가 확정되었습니다! 처형 결과를 확인하시고, 다음 <b>[🌙 밤 시작하기]</b> 버튼을 눌러주세요."</i>';
+            }
+          }
+        }
+
         // 사회자 밤/낮 컨트롤 버튼 비활성화 & 활성화 시각화
         const btnNight = document.getElementById('btnAdminNightStart');
         const btnDay = document.getElementById('btnAdminDayStart');
@@ -4520,6 +4634,81 @@
           }
         }
 
+        // 7. 기자 상태 (취재 대상 또는 기회 아끼기/소진 여부 표기)
+        const allReporters = playerList.filter(p => p.role === 'reporter');
+        const repRow = document.getElementById('adminReporterRow');
+        const repLabel = document.getElementById('adminReporterNameLabel');
+        const repTargetText = document.getElementById('adminReporterTargetText');
+        if (repRow && repTargetText) {
+          if (allReporters.length === 0) {
+            repRow.style.display = 'none';
+          } else {
+            repRow.style.display = 'block';
+            if (repLabel) repLabel.textContent = `(${allReporters.map(p => p.name + (p.isAlive ? '' : '💀')).join(', ')})`;
+            const rep = allReporters[0];
+            if (!rep.isAlive) {
+              repTargetText.innerHTML = '<span style="color:#9ca3af;">사망 💀</span>';
+            } else if (gameState.reporterUsed) {
+              repTargetText.innerHTML = '<span style="color:#dc2626;">취재 완료 (능력 소진)</span>';
+            } else {
+              const tid = actions.reporterTarget;
+              repTargetText.innerHTML = (tid && players[tid])
+                ? `<b style="color:#4338ca;">[${players[tid].name}] 특종 취재 선택됨</b> (내일 아침 1면 호외 발행)`
+                : '취재 대기 중 (또는 기회 아끼기)';
+            }
+          }
+        }
+
+        // ⚠️ [밤 행동 미선택자 실시간 안내]
+        const nightUnselectedBox = document.getElementById('adminNightUnselectedBox');
+        if (nightUnselectedBox) {
+          if (gameState.phase === 'night') {
+            const pendingNames = [];
+            // 마피아
+            aliveMafias.forEach(m => {
+              if (!actions.mafiaTargets?.[m.id]) pendingNames.push(`${m.name}(마피아)`);
+            });
+            // 의사
+            aliveDoctors.forEach(d => {
+              if (!actions.doctorTargets?.[d.id]) pendingNames.push(`${d.name}(의사)`);
+            });
+            // 경찰
+            alivePolices.forEach(p => {
+              if (!actions.policeTargets?.[p.id]) pendingNames.push(`${p.name}(경찰)`);
+            });
+            // 영매 (사망자가 1명 이상 있을 때만)
+            const hasDead = playerList.some(p => !p.isAlive);
+            if (hasDead) {
+              aliveMediums.forEach(med => {
+                if (!actions.mediumTargets?.[med.id]) pendingNames.push(`${med.name}(영매)`);
+              });
+            }
+            // 미치광이 중 가짜 액션 대상
+            allMadmen.filter(m => m.isAlive).forEach(mad => {
+              const fRole = mad.fakeRole || 'police';
+              if (fRole === 'doctor' && !actions.madmanDoctorTargets?.[mad.id]) pendingNames.push(`${mad.name}(미치광이)`);
+              else if (fRole === 'police' && !actions.madmanPoliceTargets?.[mad.id]) pendingNames.push(`${mad.name}(미치광이)`);
+              else if (fRole === 'medium' && hasDead && !actions.madmanMediumTargets?.[mad.id]) pendingNames.push(`${mad.name}(미치광이)`);
+            });
+
+            if (pendingNames.length > 0) {
+              nightUnselectedBox.style.display = 'block';
+              nightUnselectedBox.style.background = '#fee2e2';
+              nightUnselectedBox.style.borderColor = '#fca5a5';
+              nightUnselectedBox.style.color = '#b91c1c';
+              nightUnselectedBox.innerHTML = `⚠️ <b>아직 밤 행동 미선택 (${pendingNames.length}명):</b> <span style="font-weight:800; color:#dc2626;">${pendingNames.join(', ')}</span>`;
+            } else {
+              nightUnselectedBox.style.display = 'block';
+              nightUnselectedBox.style.background = '#ecfdf5';
+              nightUnselectedBox.style.borderColor = '#a7f3d0';
+              nightUnselectedBox.style.color = '#065f46';
+              nightUnselectedBox.innerHTML = `✅ <b>모든 특수 직업 밤 행동 완료!</b> (밤 종료 가능)`;
+            }
+          } else {
+            nightUnselectedBox.style.display = 'none';
+          }
+        }
+
         // 판정 결과
         if (gameState.lastNightResult) {
           const r = gameState.lastNightResult;
@@ -4559,6 +4748,25 @@
             document.getElementById('adminDayVoteCountText').textContent = Object.keys(dayVotes).length;
             document.getElementById('adminAliveCountText').textContent = alivePlayers.length;
 
+            // ⚠️ 낮 1차 미투표자 명단 실시간 표시
+            const dayUnvotedBox = document.getElementById('adminDayUnvotedBox');
+            if (dayUnvotedBox) {
+              const unvoted = alivePlayers.filter(p => !dayVotes[p.id]);
+              if (unvoted.length > 0) {
+                dayUnvotedBox.innerHTML = `
+                  <div style="background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:6px 10px; color:#b91c1c;">
+                    <b>⚠️ 아직 미투표 (${unvoted.length}명):</b> <span style="font-weight:800; color:#dc2626;">${unvoted.map(p => p.name).join(', ')}</span>
+                  </div>
+                `;
+              } else {
+                dayUnvotedBox.innerHTML = `
+                  <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:6px 10px; color:#065f46; font-weight:700;">
+                    ✅ 생존자 전원 투표 완료! (즉시 결과 발표 가능)
+                  </div>
+                `;
+              }
+            }
+
           } else if (dayStep === 'verdict') {
             adminStep1.style.display = 'none';
             adminStep2.style.display = 'block';
@@ -4572,6 +4780,25 @@
             const trialVotes = gameState.trialVotes || {};
             document.getElementById('adminTrialVoteCountText').textContent = Object.keys(trialVotes).length;
             document.getElementById('adminTrialAliveCountText').textContent = alivePlayers.length;
+
+            // ⚠️ 낮 2차 찬반 미투표자 명단 실시간 표시
+            const trialUnvotedBox = document.getElementById('adminTrialUnvotedBox');
+            if (trialUnvotedBox) {
+              const trialUnvoted = alivePlayers.filter(p => !trialVotes[p.id]);
+              if (trialUnvoted.length > 0) {
+                trialUnvotedBox.innerHTML = `
+                  <div style="background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:6px 10px; color:#b91c1c;">
+                    <b>⚠️ 아직 찬반 미투표 (${trialUnvoted.length}명):</b> <span style="font-weight:800; color:#dc2626;">${trialUnvoted.map(p => p.name).join(', ')}</span>
+                  </div>
+                `;
+              } else {
+                trialUnvotedBox.innerHTML = `
+                  <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:6px 10px; color:#065f46; font-weight:700;">
+                    ✅ 생존자 전원 찬반 투표 완료! (즉시 처형 집행 가능)
+                  </div>
+                `;
+              }
+            }
 
           } else if (dayStep === 'finished') {
             adminStep1.style.display = 'none';
