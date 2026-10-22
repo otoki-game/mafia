@@ -583,6 +583,50 @@
       justify-content: space-between;
       align-items: center;
     }
+
+    /* Stepper (- / +) 버튼 스타일 */
+    .btn-stepper {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1.5px solid #cbd5e1;
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 1.3rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+      user-select: none;
+    }
+    .btn-stepper:active {
+      transform: scale(0.92);
+      background: #e2e8f0;
+    }
+    .btn-stepper-sm {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+      user-select: none;
+    }
+    .btn-stepper-sm:active {
+      transform: scale(0.92);
+      background: #e2e8f0;
+    }
   </style>
 </head>
 <body>
@@ -942,65 +986,91 @@
 
         <!-- 탭 2: 랜덤 배정 -->
         <div id="assignRandomBox" style="display: none;">
-          <div style="margin-bottom: 8px;">
-            <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">마피아 인원 수</label>
-            <select id="selectMafiaCount">
-              <option value="2">마피아 2명 (7~11명 추천)</option>
-              <option value="3" selected>마피아 3명 (12~17명 추천)</option>
-              <option value="4">마피아 4명 (18~21명 추천)</option>
-              <option value="5">마피아 5명 (22~26명 야유회 추천!)</option>
-              <option value="6">마피아 6명 (27명 이상 대규모)</option>
-            </select>
+          <!-- 마피아 인원 Stepper (- / +) : 최소 1명 ~ 최대 5명 -->
+          <div style="background:#fff; border:1.5px solid #fca5a5; border-radius:10px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:0.92rem; font-weight:800; color:var(--mafia-red);">🔪 마피아 인원</div>
+              <div style="font-size:0.75rem; color:#991b1b;">최소 1명 ~ 최대 5명 (22인 야유회는 4~5명 추천!)</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" class="btn-stepper" onclick="changeRoleCount('selectMafiaCount', -1, 1, 5)">−</button>
+              <span id="display_selectMafiaCount" style="font-size:1.15rem; font-weight:900; min-width:24px; text-align:center; color:var(--mafia-red);">3</span>명
+              <input type="hidden" id="selectMafiaCount" value="3">
+              <button type="button" class="btn-stepper" onclick="changeRoleCount('selectMafiaCount', 1, 1, 5)">+</button>
+            </div>
           </div>
 
-          <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">포함할 특수 직업 인원 설정 (최대 2명)</label>
+          <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">
+            포함할 특수 직업 인원 설정 (최대 4명까지 자유 조절, 사기꾼은 단독 1명)
+          </label>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <!-- 의사 (0~4명) -->
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
               <span style="font-size:0.83rem; font-weight:700;">💉 의사</span>
-              <select id="selectDoctorCount" style="width:75px; margin:0; padding:4px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:6px;">
-                <option value="0">0명</option>
-                <option value="1" selected>1명</option>
-                <option value="2">2명</option>
-              </select>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectDoctorCount', -1, 0, 4)">−</button>
+                <span id="display_selectDoctorCount" style="font-size:0.95rem; font-weight:800; min-width:18px; text-align:center; color:var(--doctor-green);">1</span>명
+                <input type="hidden" id="selectDoctorCount" value="1">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectDoctorCount', 1, 0, 4)">+</button>
+              </div>
             </div>
-            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+
+            <!-- 경찰 (0~4명) -->
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
               <span style="font-size:0.83rem; font-weight:700;">🔍 경찰</span>
-              <select id="selectPoliceCount" style="width:75px; margin:0; padding:4px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:6px;">
-                <option value="0">0명</option>
-                <option value="1" selected>1명</option>
-                <option value="2">2명</option>
-              </select>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectPoliceCount', -1, 0, 4)">−</button>
+                <span id="display_selectPoliceCount" style="font-size:0.95rem; font-weight:800; min-width:18px; text-align:center; color:var(--police-blue);">1</span>명
+                <input type="hidden" id="selectPoliceCount" value="1">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectPoliceCount', 1, 0, 4)">+</button>
+              </div>
             </div>
-            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+
+            <!-- 군인 (0~4명) -->
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
               <span style="font-size:0.83rem; font-weight:700;">🛡️ 군인</span>
-              <select id="selectSoldierCount" style="width:75px; margin:0; padding:4px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:6px;">
-                <option value="0">0명</option>
-                <option value="1" selected>1명</option>
-                <option value="2">2명</option>
-              </select>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectSoldierCount', -1, 0, 4)">−</button>
+                <span id="display_selectSoldierCount" style="font-size:0.95rem; font-weight:800; min-width:18px; text-align:center; color:var(--soldier-amber);">1</span>명
+                <input type="hidden" id="selectSoldierCount" value="1">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectSoldierCount', 1, 0, 4)">+</button>
+              </div>
             </div>
-            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+
+            <!-- 영매 (0~4명) -->
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
               <span style="font-size:0.83rem; font-weight:700;">👻 영매</span>
-              <select id="selectMediumCount" style="width:75px; margin:0; padding:4px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:6px;">
-                <option value="0">0명</option>
-                <option value="1" selected>1명</option>
-                <option value="2">2명</option>
-              </select>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectMediumCount', -1, 0, 4)">−</button>
+                <span id="display_selectMediumCount" style="font-size:0.95rem; font-weight:800; min-width:18px; text-align:center; color:var(--medium-purple);">1</span>명
+                <input type="hidden" id="selectMediumCount" value="1">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectMediumCount', 1, 0, 4)">+</button>
+              </div>
             </div>
-            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+
+            <!-- 미치광이 (0~4명) -->
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
               <span style="font-size:0.83rem; font-weight:700; color:#db2777;">🤪 미치광이</span>
-              <select id="selectMadmanCount" style="width:75px; margin:0; padding:4px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:6px;">
-                <option value="0" selected>0명</option>
-                <option value="1">1명</option>
-                <option value="2">2명</option>
-              </select>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectMadmanCount', -1, 0, 4)">−</button>
+                <span id="display_selectMadmanCount" style="font-size:0.95rem; font-weight:800; min-width:18px; text-align:center; color:#db2777;">0</span>명
+                <input type="hidden" id="selectMadmanCount" value="0">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectMadmanCount', 1, 0, 4)">+</button>
+              </div>
             </div>
-            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:0.83rem; font-weight:700; color:#b45309;">🃏 사기꾼</span>
-              <select id="selectSwindlerCount" style="width:75px; margin:0; padding:4px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:6px;">
-                <option value="0" selected>0명</option>
-                <option value="1">1명 (단독)</option>
-              </select>
+
+            <!-- 사기꾼 (중립 세력 단독: 0~1명) -->
+            <div style="background:#fff; border:1px solid #fde68a; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span style="font-size:0.83rem; font-weight:700; color:#b45309;">🃏 사기꾼</span>
+                <span style="font-size:0.68rem; color:#92400e; display:block;">(중립/최대1명)</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectSwindlerCount', -1, 0, 1)">−</button>
+                <span id="display_selectSwindlerCount" style="font-size:0.95rem; font-weight:800; min-width:18px; text-align:center; color:#b45309;">0</span>명
+                <input type="hidden" id="selectSwindlerCount" value="0">
+                <button type="button" class="btn-stepper-sm" onclick="changeRoleCount('selectSwindlerCount', 1, 0, 1)">+</button>
+              </div>
             </div>
           </div>
           <p style="font-size: 0.78rem; color: #6b7280; margin-bottom: 12px; line-height: 1.4;">
@@ -2023,6 +2093,19 @@
       gameState.madmanMediumReports = {};
     }
 
+    // [Stepper Helper] - / + 버튼으로 인원수 변경
+    function changeRoleCount(elementId, delta, minVal, maxVal) {
+      const input = document.getElementById(elementId);
+      const display = document.getElementById('display_' + elementId);
+      if (!input || !display) return;
+      let val = parseInt(input.value) || 0;
+      val += delta;
+      if (val < minVal) val = minVal;
+      if (val > maxVal) val = maxVal;
+      input.value = val;
+      display.textContent = val;
+    }
+
     function saveManualRoles() {
       const playerIds = Object.keys(gameState.players || {});
       if (playerIds.length < 4) {
@@ -2037,6 +2120,45 @@
         const select = document.getElementById('role_select_' + pid);
         if (select) {
           const role = select.value;
+          counts[role] = (counts[role] || 0) + 1;
+        }
+      });
+
+      if (counts.mafia === 0) {
+        alert("마피아를 최소 1명 이상 지정해 주세요!");
+        return;
+      }
+
+      // [직접 배정 밸런스 검증] 특수직업 최대 4명, 사기꾼 최대 1명 제한
+      if (counts.doctor > 4) {
+        alert(`⚠️ 의사는 최대 4명까지만 지정할 수 있습니다! (현재 ${counts.doctor}명 선택됨)`);
+        return;
+      }
+      if (counts.police > 4) {
+        alert(`⚠️ 경찰은 최대 4명까지만 지정할 수 있습니다! (현재 ${counts.police}명 선택됨)`);
+        return;
+      }
+      if (counts.soldier > 4) {
+        alert(`⚠️ 군인은 최대 4명까지만 지정할 수 있습니다! (현재 ${counts.soldier}명 선택됨)`);
+        return;
+      }
+      if (counts.medium > 4) {
+        alert(`⚠️ 영매는 최대 4명까지만 지정할 수 있습니다! (현재 ${counts.medium}명 선택됨)`);
+        return;
+      }
+      if (counts.madman > 4) {
+        alert(`⚠️ 미치광이는 최대 4명까지만 지정할 수 있습니다! (현재 ${counts.madman}명 선택됨)`);
+        return;
+      }
+      if (counts.swindler > 1) {
+        alert(`⚠️ 사기꾼(중립)은 게임 밸런스상 최대 1명만 단독으로 지정할 수 있습니다! (현재 ${counts.swindler}명 선택됨)`);
+        return;
+      }
+
+      playerIds.forEach(pid => {
+        const select = document.getElementById('role_select_' + pid);
+        if (select) {
+          const role = select.value;
           gameState.players[pid].role = role;
           gameState.players[pid].isAlive = true;
           gameState.players[pid].soldierArmor = (role === 'soldier');
@@ -2046,14 +2168,8 @@
           } else {
             delete gameState.players[pid].fakeRole;
           }
-          counts[role] = (counts[role] || 0) + 1;
         }
       });
-
-      if (counts.mafia === 0) {
-        alert("마피아를 최소 1명 이상 지정해 주세요!");
-        return;
-      }
 
       resetGameStateForNewGame('day');
       syncGameStateToCloud();
