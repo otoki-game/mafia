@@ -1158,7 +1158,7 @@
       </div>
 
       <!-- 낮 스마트폰 재판 및 투표 진행 패널 -->
-      <div class="card">
+      <div class="card" id="adminDayTrialPanelCard" style="display: none;">
         <div class="card-title">⚖️ 낮 투표 및 재판 진행 패널</div>
 
         <!-- 단계 1: 1차 지목 투표 진행 중 -->
@@ -3080,14 +3080,12 @@
 
       gameState.lastNightResult = {
         mafiaTarget: mafiaTarget,
-        doctorTarget: doctorTarget,
+        doctorTargets: doctorTargets,
         soldierTarget: null,
         killedPlayerId: killedPlayerId,
         isSavedByDoctor: isSavedByDoctor,
         isSavedBySoldier: isSavedBySoldier,
         isMafiaTie: isMafiaTie,
-        policeResult: policeResult,
-        mediumResult: mediumResult,
         breakingNews: breakingNews
       };
     }
@@ -4373,7 +4371,14 @@
         const btnNightToDay = document.getElementById('btnAdminNightToDay');
         const btnDayToNight = document.getElementById('btnAdminDayToNight');
 
+        // 밤 카드와 낮 카드 페이즈별 명확한 분리 표시
+        const nightCard = document.getElementById('adminNightResultCard');
+        const dayTrialCard = document.getElementById('adminDayTrialPanelCard');
+
         if (gameState.phase === 'night') {
+          if (nightCard) nightCard.style.display = 'block';
+          if (dayTrialCard) dayTrialCard.style.display = 'none';
+
           // [밤 진행 중] 밤 시작 버튼 비활성화 표시, 낮 시작 버튼 강조
           if (btnNight) {
             btnNight.style.opacity = '0.4';
@@ -4397,6 +4402,9 @@
             btnDayToNight.style.cursor = 'not-allowed';
           }
         } else if (gameState.phase === 'day') {
+          if (nightCard) nightCard.style.display = 'none';
+          if (dayTrialCard) dayTrialCard.style.display = 'block';
+
           // [낮 진행 중] 낮 시작 버튼 비활성화 표시, 밤 시작 버튼 강조
           if (btnNight) {
             btnNight.style.opacity = '1';
@@ -4420,6 +4428,9 @@
             btnDayToNight.style.cursor = 'pointer';
           }
         } else {
+          if (nightCard) nightCard.style.display = 'none';
+          if (dayTrialCard) dayTrialCard.style.display = 'none';
+
           // [대기실]
           if (btnNight) {
             btnNight.style.opacity = '1';
