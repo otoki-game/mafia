@@ -2155,6 +2155,8 @@
         return;
       }
 
+      // 미치광이들에게 서로 겹치지 않는 고유 위장 직업 부여 (중복 방지 셔플)
+      const madmanPlayers = [];
       playerIds.forEach(pid => {
         const select = document.getElementById('role_select_' + pid);
         if (select) {
@@ -2163,12 +2165,18 @@
           gameState.players[pid].isAlive = true;
           gameState.players[pid].soldierArmor = (role === 'soldier');
           if (role === 'madman') {
-            gameState.players[pid].fakeRole = fakeOptions[Math.floor(Math.random() * fakeOptions.length)];
+            madmanPlayers.push(gameState.players[pid]);
             gameState.players[pid].soldierArmor = false;
           } else {
             delete gameState.players[pid].fakeRole;
           }
         }
+      });
+
+      // 복수 미치광이 위장 직업 중복 방지 분배
+      const shuffledFakeOptions = ['doctor', 'police', 'soldier', 'medium'].sort(() => Math.random() - 0.5);
+      madmanPlayers.forEach((madP, mIdx) => {
+        madP.fakeRole = shuffledFakeOptions[mIdx % shuffledFakeOptions.length];
       });
 
       resetGameStateForNewGame('day');
@@ -2207,7 +2215,6 @@
       }
 
       const shuffled = [...playerIds].sort(() => Math.random() - 0.5);
-      const fakeOptions = ['doctor', 'police', 'soldier', 'medium'];
 
       playerIds.forEach(pid => {
         gameState.players[pid].role = 'citizen';
@@ -2221,13 +2228,19 @@
         gameState.players[shuffled[idx++]].role = 'mafia';
       }
 
+      // 미치광이 위장 직업 중복 방지 셔플 풀 준비
+      const shuffledFakeOptions = ['doctor', 'police', 'soldier', 'medium'].sort(() => Math.random() - 0.5);
+      let madmanIndex = 0;
+
       specialRoles.forEach(role => {
         const p = gameState.players[shuffled[idx++]];
         p.role = role;
         if (role === 'soldier') {
           p.soldierArmor = true;
         } else if (role === 'madman') {
-          p.fakeRole = fakeOptions[Math.floor(Math.random() * fakeOptions.length)];
+          // 중복 없이 서로 다른 위장 직업 부여 (최대 4명까지 각각 고유 직업 보장!)
+          p.fakeRole = shuffledFakeOptions[madmanIndex % shuffledFakeOptions.length];
+          madmanIndex++;
           p.soldierArmor = false; // 위장이 군인이더라도 실제 방탄 없음!
         }
       });
