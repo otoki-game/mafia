@@ -2187,9 +2187,19 @@
           hallOfFame: hallOfFame,
           seq: gameOverSeq
         };
-        // 공식 종료 후 대기실(lobby)로 복귀 & 전원 생존 부활
+        // 공식 종료 후 대기실(lobby)로 복귀 & 잔여 투표/밤 행동 완전 초기화 & 전원 생존 부활
         gameState.phase = 'lobby';
+        gameState.dayCount = 1;
         gameState.dayStep = 'voting';
+        gameState.dayVotes = {};
+        gameState.dayVoteResult = null;
+        gameState.trialTargetId = null;
+        gameState.trialVotes = {};
+        gameState.trialResult = null;
+        gameState.lastNightResult = null;
+        gameState.nightActions = {};
+        gameState.breakingNews = null;
+        gameState.breakingNewsList = [];
         players.forEach(p => {
           p.isAlive = true;
           p.soldierArmor = (p.role === 'soldier');
@@ -3399,26 +3409,17 @@
     }
 
     function resetEntireGame() {
-      if (confirm("전체 게임을 초기화하고 대기실로 돌아가시겠습니까?")) {
-        gameState.phase = 'lobby';
-        gameState.nightActions = {};
-        gameState.dayStep = 'voting';
-        gameState.dayVotes = {};
-        gameState.dayVoteResult = null;
-        gameState.trialTargetId = null;
-        gameState.trialVotes = {};
-        gameState.trialResult = null;
-        gameState.lastNightResult = null;
-        gameState.policeHistory = [];
-        gameState.mediumHistory = [];
-        gameState.nightAnnounceSeq = 0;
-        localStorage.removeItem('mafia_seen_night_seq');
+      if (confirm("전체 게임을 초기화하고 대기실로 돌아가시겠습니까?\n\n• 모든 직업과 투표 상태가 초기화됩니다.\n• 참가자들은 대기실 처음 상태로 돌아갑니다.")) {
+        resetGameStateForNewGame('lobby');
         Object.keys(gameState.players || {}).forEach(pid => {
           gameState.players[pid].role = 'citizen';
           gameState.players[pid].isAlive = true;
-          gameState.players[pid].soldierArmor = true;
+          gameState.players[pid].soldierArmor = false;
+          delete gameState.players[pid].fakeRole;
         });
         syncGameStateToCloud();
+        renderUI();
+        alert("전체 게임이 초기화되었습니다. 모든 참가자가 대기실 상태로 복귀했습니다.");
       }
     }
 
@@ -3675,6 +3676,16 @@
           document.getElementById('playerPhaseBanner').style.display = 'none';
           document.getElementById('playerNightActionCard').style.display = 'none';
           document.getElementById('playerDayVoteCard').style.display = 'none';
+          document.getElementById('playerDayVoteResultCard').style.display = 'none';
+          document.getElementById('playerTrialCard').style.display = 'none';
+          document.getElementById('playerTrialResultCard').style.display = 'none';
+          document.getElementById('playerNightReportCard').style.display = 'none';
+          if (document.getElementById('playerBreakingNewsCard')) {
+            document.getElementById('playerBreakingNewsCard').style.display = 'none';
+          }
+          if (document.getElementById('playerInvestigationHistoryCard')) {
+            document.getElementById('playerInvestigationHistoryCard').style.display = 'none';
+          }
           document.getElementById('playerWaitingCard').style.display = 'block';
           document.getElementById('waitingTitle').textContent = `대기실 입장 완료 (${me.name}님)`;
           document.getElementById('waitingDesc').textContent = '사회자가 직업을 배정하고 게임을 시작하면 내 직업 카드가 표시됩니다.';
