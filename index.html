@@ -916,8 +916,7 @@
       <!-- [NEW] 낮 시간: 전광판 1면 특종 호외 카드 (기자가 보도 터뜨렸을 때 모두에게 항상 표시) -->
       <div class="card" id="playerBreakingNewsCard"
         style="display: none; border-radius: 14px; background: #eef2ff; border: 2px solid #6366f1; box-shadow: 0 4px 12px rgba(99,102,241,0.18);">
-        <div style="font-size: 0.88rem; font-weight: 900; color: #4338ca; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-          <span>📰</span> <span id="playerBreakingNewsHeader">[1면 특종 호외] 기자의 단독 보도!</span>
+        <div id="playerBreakingNewsHeader" style="display: none; font-size: 0.88rem; font-weight: 900; color: #4338ca; align-items: center; gap: 6px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1.5px dashed #c7d2fe;">
         </div>
         <div id="playerBreakingNewsContent" style="font-size: 0.93rem; color: #1e1b4b; line-height: 1.5; font-weight: 700;"></div>
       </div>
@@ -2084,6 +2083,7 @@
     function closeGameOverModal() {
       const modal = document.getElementById('gameOverModal');
       if (modal) modal.classList.remove('active');
+      document.body.classList.remove('theme-dead');
       if (gameState && gameState.gameOverData && gameState.gameOverData.seq) {
         localStorage.setItem('mafia_seen_game_over_seq', gameState.gameOverData.seq.toString());
       }
@@ -2173,9 +2173,14 @@
           hallOfFame: hallOfFame,
           seq: gameOverSeq
         };
-        // 공식 종료 후 대기실(lobby)로 복귀
+        // 공식 종료 후 대기실(lobby)로 복귀 & 전원 생존 부활
         gameState.phase = 'lobby';
         gameState.dayStep = 'voting';
+        players.forEach(p => {
+          p.isAlive = true;
+          p.soldierArmor = (p.role === 'soldier');
+          p.reporterUsed = false;
+        });
 
         // 🚀 실시간 클라우드 동기화 즉시 실행! (모든 참가자 기기에 실시간 결과 팝업 트리거)
         syncGameStateToCloud();
@@ -3555,6 +3560,7 @@
       } else {
         document.body.classList.remove('theme-night');
         document.body.classList.remove('theme-day');
+        document.body.classList.remove('theme-dead');
       }
 
       // [공통 1회성 팝업] 밤이 끝나고 낮이 되었을 때 지난밤 결과 모달 자동 표시
@@ -3640,9 +3646,9 @@
         const topNameEl = document.getElementById('topPlayerNameDisplay');
         if (topNameEl) topNameEl.textContent = me.name;
 
-        // [사망자 극적 시각화] 사망 시 흑백 묘지 테마 및 거대한 묘비 배너 노출
+        // [사망자 극적 시각화] 게임 진행 중(낮/밤)에 사망했을 때만 흑백 묘지 테마 및 묘비 배너 노출 (대기실에서는 항상 밝은 기본 테마)
         const deadBanner = document.getElementById('playerDeadBannerCard');
-        if (!me.isAlive) {
+        if (!me.isAlive && gameState.phase !== 'lobby') {
           document.body.classList.add('theme-dead');
           if (deadBanner) deadBanner.style.display = 'block';
         } else {
@@ -3800,22 +3806,28 @@
                 let contentHtml = '';
                 newsList.forEach((news, idx) => {
                   const repName = news.reporterName || '기자';
-                  const badgeTitle = newsList.length > 1 ? `[특종 호외 ${idx + 1}]` : `[1면 특종 호외]`;
+                  const badgeTitle = newsList.length > 1 ? `[1면 특종 호외 ${idx + 1}]` : `[1면 특종 호외]`;
                   contentHtml += `
                     <div style="${idx > 0 ? 'margin-top:10px; padding-top:10px; border-top:1.5px dashed #c7d2fe;' : ''}">
-                      <div style="font-size:0.86rem; font-weight:900; color:#4338ca; margin-bottom:4px; display:flex; align-items:center; gap:5px;">
+                      <div style="font-size:0.92rem; font-weight:900; color:#4338ca; margin-bottom:6px; display:flex; align-items:center; gap:5px;">
                         <span>📰</span> <span>${badgeTitle} <b>${repName} 기자</b> 단독 보도!</span>
                       </div>
-                      <div style="font-size:0.92rem; color:#1e1b4b; line-height:1.5;">
+                      <div style="font-size:0.93rem; color:#1e1b4b; line-height:1.55;">
                         <b>[${repName}] 기자</b>의 밀착 취재 결과:<br>
-                        <b>[${news.targetName}]</b> 님의 정체는 <b style="color:#4338ca; text-decoration:underline; font-size:1.02rem;">'${news.targetRole}'</b>!
+                        <b>[${news.targetName}]</b> 님의 정체는 <b style="color:#4338ca; text-decoration:underline; font-size:1.05rem;">'${news.targetRole}'</b>!
                       </div>
                     </div>
                   `;
                 });
-                document.getElementById('playerBreakingNewsHeader').innerHTML = newsList.length > 1
-                  ? `🔥 [특종 대격돌!] 2명의 기자가 각각 호외를 발행했습니다!`
-                  : `[1면 특종 호외] 기자의 단독 보도!`;
+                const headerEl = document.getElementById('playerBreakingNewsHeader');
+                if (headerEl) {
+                  if (newsList.length > 1) {
+                    headerEl.style.display = 'flex';
+                    headerEl.innerHTML = `<span>🔥</span> <span><b>[특종 대격돌!]</b> 2명의 기자가 각각 호외를 발행했습니다!</span>`;
+                  } else {
+                    headerEl.style.display = 'none';
+                  }
+                }
                 document.getElementById('playerBreakingNewsContent').innerHTML = contentHtml;
               } else {
                 newsCard.style.display = 'none';
