@@ -851,13 +851,13 @@
         <div class="role-guide-item" onclick="handleGuideItemClick('citizen')"><b style="color:var(--citizen-gray);">🕊️
             시민:</b> 선량한 시민입니다. 낮에 토론과 스마트폰 익명 투표로 마피아를 찾습니다.</div>
         <div class="role-guide-item" onclick="handleGuideItemClick('madman')"><b style="color:#db2777;">🤪 미치광이:</b>
-          <b>시민팀</b>. 본인은 자신이 정상적인 특수직업(의사/경찰 등)으로 착각하며, 밤마다 조작된 잘못된 정보를 받습니다. (본인 화면엔 미치광이라는 사실이 절대 뜨지 않음)</div>
+          <b>마피아팀 특수</b>. 본인은 자신이 정상적인 특수직업(의사/경찰 등)으로 착각하지만 실은 마피아팀입니다. (마피아 승리 시 함께 승리, 본인 화면엔 미치광이라는 사실이 절대 뜨지 않음)</div>
         <div class="role-guide-item" onclick="handleGuideItemClick('swindler')"><b style="color:#b45309;">🃏 사기꾼:</b>
           <b>중립(Neutral) 진영</b>. 낮에 스마트폰 투표로 <b>자신이 처형당하는 것이 유일한 승리 목표</b>입니다! (처형 시 단독 승리, 밤에 마피아에게 살해당하면 패배)</div>
         <div class="role-guide-item" onclick="handleGuideItemClick('politician')"><b style="color:#0e7490;">🏛️ 정치인:</b>
           <b>시민팀</b>. 낮 투표에서 처형 찬성을 받아도 <b>처형당하지 않고 면제</b>되며 당당히 살아남습니다! (밤에 마피아 암살은 주의)</div>
         <div class="role-guide-item" onclick="handleGuideItemClick('reporter')"><b style="color:#4338ca;">📰 기자:</b>
-          <b>시민팀</b>. 게임 중 <b>단 1회</b> 밤에 1명을 밀착 취재하여 다음 날 아침 전광판에 진짜 직업을 1면 특종 호외로 폭로합니다!</div>
+          <b>시민팀</b>. 게임 중 <b>단 1회</b> 밤에 1명을 밀착 취재하여 다음 날 아침 진짜 직업을 특종으로 메인에 표시합니다!</div>
         <div class="role-guide-item" onclick="handleGuideItemClick('terrorist')"><b style="color:#c2410c;">💣 테러리스트:</b>
           <b>시민팀</b>. 낮 투표로 처형이 확정될 때, 자신에게 찬성표를 던진 사람 중 1명을 <b>길동무로 함께 폭사</b>시킵니다!</div>
       </div>
@@ -2096,7 +2096,10 @@
       const players = Object.values(gameState.players || {});
       const alivePlayers = players.filter(p => p.isAlive);
       const aliveMafias = alivePlayers.filter(p => p.role === 'mafia');
-      const aliveNonMafias = alivePlayers.filter(p => p.role !== 'mafia');
+      const aliveMadmen = alivePlayers.filter(p => p.role === 'madman');
+      // 순수 시민팀(시민, 의사, 경찰, 군인, 영매, 정치인, 기자, 테러리스트)
+      const alivePureCitizens = alivePlayers.filter(p => p.role !== 'mafia' && p.role !== 'madman' && p.role !== 'swindler');
+      const aliveSwindlers = alivePlayers.filter(p => p.role === 'swindler');
 
       let winner = null;
       let title = '';
@@ -2136,20 +2139,31 @@
           </p>
         `;
       }
-      // [3] 마피아팀 승리 체크: 생존 마피아 수 >= 생존 시민 수
-      else if (aliveMafias.length >= aliveNonMafias.length) {
+      // [3] 마피아팀 승리 체크:
+      // (a) 순수한 시민팀이 전멸했거나(0명),
+      // (b) 생존 마피아 수가 생존 비마피아(시민+사기꾼) 수 이상이거나,
+      // (c) 마피아팀(마피아+미치광이) 전원이 살아남아 순수 시민 수보다 같거나 많아져 대항 불가인 경우
+      else if (alivePureCitizens.length === 0 || aliveMafias.length >= (alivePureCitizens.length + aliveSwindlers.length)) {
         winner = 'mafia';
         icon = '🔪';
         title = '마피아 진영 최종 승리!';
         borderColor = '#dc2626';
         const mafiaNames = aliveMafias.map(m => m.name).join(', ');
+        const madmanNames = aliveMadmen.map(m => m.name).join(', ');
+        
+        let subText = `생존 마피아(${aliveMafias.length}명)가 생존 시민을 압도하여 시민들이 더 이상 대항할 수 없습니다.`;
+        if (alivePureCitizens.length === 0) {
+          subText = `모든 선량한 시민들이 소탕되었습니다! 생존자 전원이 마피아 진영(마피아 & 미치광이)입니다.`;
+        }
+
         reason = `
           <div style="font-size:1.05rem; font-weight:800; color:#dc2626; margin-bottom:8px;">
             🩸 마피아가 마을을 완전히 장악했습니다!
           </div>
           <p style="margin:0; line-height:1.5;">
-            생존 마피아(${aliveMafias.length}명)가 생존 시민(${aliveNonMafias.length}명)과 같거나 많아져 시민들이 더 이상 대항할 수 없습니다.<br><br>
-            <b>생존 마피아:</b> <span style="color:#b91c1c; font-weight:800;">${mafiaNames}</span>
+            ${subText}<br><br>
+            <b>생존 마피아:</b> <span style="color:#b91c1c; font-weight:800;">${mafiaNames || '없음'}</span>
+            ${madmanNames ? `<br><b>생존 미치광이:</b> <span style="color:#db2777; font-weight:800;">${madmanNames}</span>` : ''}
           </p>
         `;
       }
