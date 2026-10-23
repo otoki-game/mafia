@@ -1568,7 +1568,7 @@
   <!-- ============================================== -->
   <!-- 🏆 게임 종료 및 승리 진영 발표 팝업 모달 (모든 참가자 공통) -->
   <!-- ============================================== -->
-  <div id="gameOverModal" class="secret-modal">
+  <div id="gameOverModal" class="secret-modal" style="z-index: 99998;">
     <div class="secret-modal-content" id="gameOverModalContent"
       style="max-width: 420px; text-align: center; border: 2.5px solid #10b981; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
       <div id="gameOverIcon" style="font-size: 3.2rem; margin-bottom: 6px;">🎉</div>
@@ -1750,12 +1750,20 @@
        [3] 실시간 클라우드 동기화
        ===================================================================== */
     function syncGameStateToCloud() {
-      if (isFirebaseReady && db) {
-        db.ref('mafiaGame').set(gameState);
-      } else {
-        localStorage.setItem('mafia_local_game_state', JSON.stringify(gameState));
-        window.dispatchEvent(new Event('storage'));
-        renderUI();
+      try {
+        // Firebase Realtime DB는 객체에 undefined가 있으면 set() 에러를 내며 쓰기를 거부하므로 완전 정제
+        const cleanState = JSON.parse(JSON.stringify(gameState));
+        if (isFirebaseReady && db) {
+          db.ref('mafiaGame').set(cleanState).catch(err => {
+            console.error("Firebase 실시간 동기화 에러:", err);
+          });
+        } else {
+          localStorage.setItem('mafia_local_game_state', JSON.stringify(cleanState));
+          window.dispatchEvent(new Event('storage'));
+          renderUI();
+        }
+      } catch (e) {
+        console.error("syncGameStateToCloud 직렬화 에러:", e);
       }
     }
 
@@ -1965,19 +1973,23 @@
         `;
       }
 
-      if (r.breakingNews) {
-        const repName = r.breakingNews.reporterName || '기자';
-        bodyEl.innerHTML += `
-          <div style="margin-top:12px; padding:11px 13px; background:#eef2ff; border:2px solid #6366f1; border-radius:12px; text-align:left; box-shadow:0 3px 8px rgba(99,102,241,0.15);">
-            <div style="font-size:0.88rem; font-weight:900; color:#4338ca; display:flex; align-items:center; gap:5px; margin-bottom:5px;">
-              <span>📰</span> <span>[1면 특종 호외] <b>${repName} 기자</b> 단독 보도!</span>
+      const newsList = r.breakingNewsList || (r.breakingNews ? [r.breakingNews] : []);
+      if (newsList.length > 0) {
+        newsList.forEach((news, idx) => {
+          const repName = news.reporterName || '기자';
+          const badgeTitle = newsList.length > 1 ? `[1면 특종 호외 ${idx + 1}]` : `[1면 특종 호외]`;
+          bodyEl.innerHTML += `
+            <div style="margin-top:12px; padding:11px 13px; background:#eef2ff; border:2px solid #6366f1; border-radius:12px; text-align:left; box-shadow:0 3px 8px rgba(99,102,241,0.15);">
+              <div style="font-size:0.88rem; font-weight:900; color:#4338ca; display:flex; align-items:center; gap:5px; margin-bottom:5px;">
+                <span>📰</span> <span>${badgeTitle} <b>${repName} 기자</b> 단독 보도!</span>
+              </div>
+              <div style="font-size:0.92rem; color:#1e1b4b; line-height:1.5;">
+                <b>[${repName}] 기자</b>의 밤샘 밀착 취재 결과,<br>
+                <b>[${news.targetName}]</b> 님의 정체는 <b style="color:#4338ca; font-size:1.02rem; text-decoration:underline;">'${news.targetRole}'</b>(으)로 만천하에 밝혀졌습니다!
+              </div>
             </div>
-            <div style="font-size:0.92rem; color:#1e1b4b; line-height:1.5;">
-              <b>[${repName}] 기자</b>의 밤샘 밀착 취재 결과,<br>
-              <b>[${r.breakingNews.targetName}]</b> 님의 정체는 <b style="color:#4338ca; font-size:1.02rem; text-decoration:underline;">'${r.breakingNews.targetRole}'</b>(으)로 만천하에 밝혀졌습니다!
-            </div>
-          </div>
-        `;
+          `;
+        });
       }
 
       modal.classList.add('active');
@@ -2003,6 +2015,11 @@
       const hallEl = document.getElementById('gameOverHallOfFame');
 
       if (!modal || !data) return;
+
+      // 하위 모달들이 겹치지 않도록 깔끔하게 정리
+      closeCustomAlert();
+      closeNightSummaryModal();
+      modal.style.zIndex = '99998';
 
       iconEl.textContent = data.icon || '🎉';
       titleEl.textContent = data.title || '게임 종료';
@@ -2142,29 +2159,25 @@
         const hallOfFame = players.map(p => ({
           id: p.id,
           name: p.name,
-          role: p.role,
-          fakeRole: p.fakeRole,
-          isAlive: p.isAlive
+          role: p.role || 'citizen',
+          fakeRole: p.fakeRole || null,
+          isAlive: !!p.isAlive
         }));
 
         gameState.gameOverData = {
-          winner,
-          icon,
-          title,
-          borderColor,
-          reason,
-          hallOfFame,
+          winner: winner,
+          icon: icon,
+          title: title,
+          borderColor: borderColor,
+          reason: reason,
+          hallOfFame: hallOfFame,
           seq: gameOverSeq
         };
         // 공식 종료 후 대기실(lobby)로 복귀
         gameState.phase = 'lobby';
         gameState.dayStep = 'voting';
-        // 다음 판을 위해 모든 플레이어의 생존 상태 복구
-        players.forEach(p => {
-          p.isAlive = true;
-          p.soldierArmor = (p.role === 'soldier');
-        });
 
+        // 🚀 실시간 클라우드 동기화 즉시 실행! (모든 참가자 기기에 실시간 결과 팝업 트리거)
         syncGameStateToCloud();
         renderUI();
         return true;
@@ -2661,6 +2674,7 @@
       };
       gameState.reporterUsed = false;
       gameState.breakingNews = null;
+      gameState.breakingNewsList = [];
       gameState.policeHistories = {};
       gameState.mediumHistories = {};
       gameState.madmanPoliceHistories = {};
@@ -2669,6 +2683,13 @@
       gameState.mediumReports = {};
       gameState.madmanPoliceReports = {};
       gameState.madmanMediumReports = {};
+
+      // 새 게임을 위해 모든 플레이어의 생존, 방탄조끼, 기자 취재권 복구
+      Object.values(gameState.players || {}).forEach(p => {
+        p.isAlive = true;
+        p.soldierArmor = (p.role === 'soldier');
+        p.reporterUsed = false;
+      });
     }
 
     // [Stepper Helper] - / + 버튼으로 인원수 변경
@@ -3042,44 +3063,51 @@
       });
 
       // [기자 단독 특종 기사 처리]
-      let breakingNews = null;
+      // [기자 단독 특종 기사 처리 - 복수 기자(진짜 기자 & 미치광이 기자) 동시 취재 지원!]
+      let breakingNewsList = [];
       const roleKrMap = {
         citizen: '시민', mafia: '마피아 🔪', doctor: '의사 💉', police: '경찰 🔍',
         soldier: '군인 🛡️', medium: '영매 👻', madman: '미치광이 🤪', swindler: '사기꾼 🃏',
         politician: '정치인 🏛️', reporter: '기자 📰', terrorist: '테러리스트 💣'
       };
 
+      // 1. 진짜 기자 취재 처리
       if (actions.reporterTarget) {
         const target = gameState.players[actions.reporterTarget];
         const realReporter = Object.values(gameState.players || {}).find(p => p.role === 'reporter');
         const repName = realReporter ? realReporter.name : '기자';
         if (target) {
-          breakingNews = {
+          breakingNewsList.push({
             reporterName: repName,
             targetName: target.name,
             targetRole: roleKrMap[target.role] || target.role,
             isFake: false
-          };
+          });
+          if (realReporter) realReporter.reporterUsed = true;
           gameState.reporterUsed = true;
         }
-      } else if (actions.madmanReporterTarget) {
-        // [미치광이 가짜 기자의 악마의 오보 찌라시!]
+      }
+
+      // 2. 미치광이 가짜 기자의 악마의 오보 찌라시 처리 (동시 발행 지원!)
+      if (actions.madmanReporterTarget) {
         const target = gameState.players[actions.madmanReporterTarget];
         const fakeReporter = Object.values(gameState.players || {}).find(p => p.role === 'madman' && p.fakeRole === 'reporter');
         const repName = fakeReporter ? fakeReporter.name : '기자';
         if (target) {
           // 진짜 마피아면 '선량한 시민', 마피아가 아니면 '마피아 🔪'로 가짜 특종 보도!
           const fakeRoleKr = (target.role === 'mafia') ? '선량한 시민 🕊️' : '마피아 🔪';
-          breakingNews = {
+          breakingNewsList.push({
             reporterName: repName,
             targetName: target.name,
             targetRole: fakeRoleKr,
             isFake: true
-          };
-          gameState.reporterUsed = true;
+          });
+          if (fakeReporter) fakeReporter.reporterUsed = true;
         }
       }
-      gameState.breakingNews = breakingNews;
+
+      gameState.breakingNewsList = breakingNewsList;
+      gameState.breakingNews = breakingNewsList.length > 0 ? breakingNewsList[0] : null;
 
       gameState.lastNightResult = {
         mafiaTarget: mafiaTarget,
@@ -3089,7 +3117,8 @@
         isSavedByDoctor: isSavedByDoctor,
         isSavedBySoldier: isSavedBySoldier,
         isMafiaTie: isMafiaTie,
-        breakingNews: breakingNews
+        breakingNews: gameState.breakingNews,
+        breakingNewsList: breakingNewsList
       };
     }
 
@@ -3329,11 +3358,13 @@
       }
 
       gameState.dayStep = 'finished';
-      syncGameStateToCloud();
-      renderUI();
 
       // [승패 체크] 처형 결과로 마피아 전멸(시민 승리), 사기꾼 처형(사기꾼 승리), 또는 마피아 과반 장악 시 게임 공식 종료!
-      checkGameEnd();
+      const isGameFinished = checkGameEnd();
+      if (!isGameFinished) {
+        syncGameStateToCloud();
+        renderUI();
+      }
     }
 
     function resetDayVote() {
@@ -3396,8 +3427,25 @@
       const effectiveRole = (me.role === 'madman') ? (me.fakeRole || 'police') : me.role;
 
       if (effectiveRole === 'mafia') {
+        // [1] 마피아 자기 자신 지목(자살) 방지
+        if (targetId === myPlayerId) {
+          const aliveMafias = Object.values(gameState.players || {}).filter(p => p.role === 'mafia' && p.isAlive);
+          if (aliveMafias.length <= 1) {
+            alert("⚠️ 당신은 마을의 유일한 마피아입니다!\n스스로를 암살하면 시민 승리로 게임이 즉시 종료되므로 자기 자신은 지목할 수 없습니다. 선량한 시민을 지목해 주세요!");
+          } else {
+            alert("⚠️ 마피아는 자기 자신을 직접 자살할 수 없습니다!\n동료 마피아를 제물로 삼아 시민인 척 위장하려면 [동료 마피아]의 이름을 선택해 주세요.");
+          }
+          return;
+        }
+
+        const targetPlayer = gameState.players[targetId];
         if (!gameState.nightActions.mafiaTargets) gameState.nightActions.mafiaTargets = {};
         gameState.nightActions.mafiaTargets[myPlayerId] = targetId;
+
+        // [2] 동료 마피아 희생(자작극) 지목 시 전략 안내 팝업
+        if (targetPlayer && targetPlayer.role === 'mafia') {
+          alert(`🩸 [동료 마피아 희생(자작극) 작전]\n\n동료 마피아 [${targetPlayer.name}] 님을 오늘 밤 암살 타겟으로 지정했습니다!\n\n⚠️ 마피아들의 표가 모이면 내일 아침 동료가 살해당하며, 살아남은 마피아는 시민인 척 완벽한 알리바이를 주장할 수 있습니다.`);
+        }
       } else if (effectiveRole === 'doctor') {
         if (targetId === myPlayerId && !gameState.options?.doctorSelfHeal) {
           alert("⚠️ 사회자 설정에 의해 의사는 자기 자신을 치료할 수 없습니다!");
@@ -3461,7 +3509,7 @@
         const target = gameState.players[targetId];
         alert(`🤫 [영매 접신 완료]\n\n사망한 "${target.name}" 님의 영혼과 접신을 완료했습니다.\n\n⚠️ 밤 시간 스포일러 방지를 위해, 접신 결과는 [날이 밝으면] 당신의 스마트폰에 조용히 공개됩니다!`);
       } else if (effectiveRole === 'reporter') {
-        if (gameState.reporterUsed) {
+        if (me.reporterUsed) {
           alert("⚠️ 기자는 게임 중 단 1회만 특종 기사를 발행할 수 있습니다. 이미 능력을 사용하셨습니다!");
           return;
         }
@@ -3706,7 +3754,7 @@
             roleBadge.textContent = '기자';
             roleName.textContent = '기자 📰';
             roleName.style.color = '#4338ca';
-            const used = gameState.reporterUsed;
+            const used = !!me.reporterUsed;
             roleDesc.innerHTML = used 
               ? '<b>시민팀 특수 직업 (특종 취재)</b><br>이미 이번 게임에서 단독 특종 기사를 발행했습니다. 낮 토론에서 진실을 밝혀내세요!'
               : '<b>시민팀 특수 직업 (게임 중 단 1회 특종)</b><br>밤에 1명을 밀착 취재하여 다음 날 아침 전광판에 <b>진짜 직업을 1면 특종 호외로 폭로</b>합니다! (단 1회만 사용 가능)';
@@ -3743,18 +3791,32 @@
             document.getElementById('playerNightActionCard').style.display = 'none';
             document.getElementById('playerWaitingCard').style.display = 'none';
 
-            // [NEW] 낮 시간: 전광판 1면 특종 호외 카드 표시 (기자/미치광이기자가 보도 터뜨렸을 때)
+            // [NEW] 낮 시간: 전광판 1면 특종 호외 카드 표시 (기자/미치광이기자가 보도 터뜨렸을 때 - 복수 동시 보도 지원!)
             const newsCard = document.getElementById('playerBreakingNewsCard');
             if (newsCard) {
-              if (gameState.breakingNews) {
+              const newsList = gameState.breakingNewsList || (gameState.breakingNews ? [gameState.breakingNews] : []);
+              if (newsList.length > 0) {
                 newsCard.style.display = 'block';
-                const bNews = gameState.breakingNews;
-                const repName = bNews.reporterName || '기자';
-                document.getElementById('playerBreakingNewsHeader').innerHTML = `[1면 특종 호외] <b>${repName} 기자</b> 단독 보도!`;
-                document.getElementById('playerBreakingNewsContent').innerHTML = `
-                  <b>[${repName}] 기자</b>의 밤샘 밀착 취재 결과,<br>
-                  <b>[${bNews.targetName}]</b> 님의 정체는 <b style="color:#4338ca; text-decoration:underline; font-size:1.02rem;">'${bNews.targetRole}'</b>(으)로 밝혀졌습니다!
-                `;
+                let contentHtml = '';
+                newsList.forEach((news, idx) => {
+                  const repName = news.reporterName || '기자';
+                  const badgeTitle = newsList.length > 1 ? `[특종 호외 ${idx + 1}]` : `[1면 특종 호외]`;
+                  contentHtml += `
+                    <div style="${idx > 0 ? 'margin-top:10px; padding-top:10px; border-top:1.5px dashed #c7d2fe;' : ''}">
+                      <div style="font-size:0.86rem; font-weight:900; color:#4338ca; margin-bottom:4px; display:flex; align-items:center; gap:5px;">
+                        <span>📰</span> <span>${badgeTitle} <b>${repName} 기자</b> 단독 보도!</span>
+                      </div>
+                      <div style="font-size:0.92rem; color:#1e1b4b; line-height:1.5;">
+                        <b>[${repName}] 기자</b>의 밀착 취재 결과:<br>
+                        <b>[${news.targetName}]</b> 님의 정체는 <b style="color:#4338ca; text-decoration:underline; font-size:1.02rem;">'${news.targetRole}'</b>!
+                      </div>
+                    </div>
+                  `;
+                });
+                document.getElementById('playerBreakingNewsHeader').innerHTML = newsList.length > 1
+                  ? `🔥 [특종 대격돌!] 2명의 기자가 각각 호외를 발행했습니다!`
+                  : `[1면 특종 호외] 기자의 단독 보도!`;
+                document.getElementById('playerBreakingNewsContent').innerHTML = contentHtml;
               } else {
                 newsCard.style.display = 'none';
               }
@@ -4117,19 +4179,42 @@
                 mafiaDetailsEl.innerHTML = mafiaStatusHtml;
 
                 alivePlayers.forEach(target => {
+                  const isMe = (target.id === me.id);
+                  const isComrade = (target.role === 'mafia' && !isMe);
                   const mySelected = (mafiaVotes[me.id] === target.id);
                   const chosenMafias = mafiaPlayers.filter(mp => mafiaVotes[mp.id] === target.id).map(mp => mp.name);
 
                   const item = document.createElement('div');
-                  item.className = 'action-target-item' + (mySelected ? ' selected' : '');
+                  item.className = 'action-target-item' + (mySelected ? ' selected' : '') + (isMe ? ' disabled' : '');
+                  if (isMe) {
+                    item.style.opacity = '0.55';
+                    item.style.background = '#f3f4f6';
+                    item.style.cursor = 'not-allowed';
+                  }
+
+                  let nameLabel = `<div style="font-weight:700;">${target.name}`;
+                  if (isMe) {
+                    nameLabel += ` <small style="color:#9ca3af; font-size:0.75rem; font-weight:700;">(나 - 자살 불가)</small>`;
+                  } else if (isComrade) {
+                    nameLabel += ` <small style="color:#dc2626; font-size:0.75rem; font-weight:800;">(🤝 동료 희생양 지목)</small>`;
+                  }
+                  nameLabel += `</div>`;
+
+                  let actionText = '';
+                  if (isMe) {
+                    actionText = '<span style="font-size:0.8rem; color:#9ca3af; font-weight:700;">선택불가</span>';
+                  } else if (isComrade) {
+                    actionText = `<span style="font-size:0.8rem; color:${mySelected ? 'var(--mafia-red)' : '#b91c1c'}; font-weight:800;">${mySelected ? '희생양 선택됨 ✓' : '희생양 지목'}</span>`;
+                  } else {
+                    actionText = `<span style="font-size:0.8rem; color:${mySelected ? 'var(--mafia-red)' : 'var(--text-muted)'}; font-weight:700;">${mySelected ? '선택됨 ✓' : '선택'}</span>`;
+                  }
+
                   item.innerHTML = `
                     <div>
-                      <div style="font-weight:700;">${target.name}</div>
+                      ${nameLabel}
                       ${chosenMafias.length > 0 ? `<div class="mafia-voter-tags">${chosenMafias.map(m => `<span class="mafia-tag">${m} 지목</span>`).join('')}</div>` : ''}
                     </div>
-                    <span style="font-size:0.8rem; color:${mySelected ? 'var(--mafia-red)' : 'var(--text-muted)'}; font-weight:700;">
-                      ${mySelected ? '선택됨 ✓' : '선택'}
-                    </span>
+                    ${actionText}
                   `;
                   item.onclick = () => submitPlayerNightAction(target.id);
                   targetListEl.appendChild(item);
@@ -4255,7 +4340,7 @@
                 // [5] 기자 (미치광이 기자 위장 포함) - 게임 중 단 1회 특종 밀착 취재
               } else if (effectiveRole === 'reporter') {
                 titleEl.textContent = '📰 기자 특종 밀착 취재';
-                const reporterUsed = !!gameState.reporterUsed;
+                const reporterUsed = !!me.reporterUsed;
                 const currentRepTarget = (me.role === 'madman')
                   ? gameState.nightActions?.madmanReporterTarget
                   : gameState.nightActions?.reporterTarget;
@@ -4637,8 +4722,12 @@
               } else if (fRole === 'politician') {
                 choiceText = '정치인 위장 (처형 면제 사칭)';
               } else if (fRole === 'reporter') {
-                const tid = actions.madmanReporterTarget;
-                choiceText = players[tid]?.name ? `[${players[tid].name}] 가짜 특종 취재` : '특종 취재 대기';
+                if (madP.reporterUsed) {
+                  choiceText = '가짜 특종 완료 (능력 소진)';
+                } else {
+                  const tid = actions.madmanReporterTarget;
+                  choiceText = players[tid]?.name ? `[${players[tid].name}] 가짜 특종 취재` : '특종 취재 대기';
+                }
               } else if (fRole === 'terrorist') {
                 choiceText = '테러리스트 위장 (자폭 사칭)';
               }
@@ -4662,7 +4751,7 @@
             const rep = allReporters[0];
             if (!rep.isAlive) {
               repTargetText.innerHTML = '<span style="color:#9ca3af;">사망 💀</span>';
-            } else if (gameState.reporterUsed) {
+            } else if (rep.reporterUsed) {
               repTargetText.innerHTML = '<span style="color:#dc2626;">취재 완료 (능력 소진)</span>';
             } else {
               const tid = actions.reporterTarget;
